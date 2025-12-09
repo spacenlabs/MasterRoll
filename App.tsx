@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import DemoRequestModal from './components/DemoRequestModal';
+import ScrollToTopButton from './components/ScrollToTopButton';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
 
 // Pages
@@ -21,6 +22,26 @@ const AppContent: React.FC = () => {
   const { currentPage } = useNavigation();
   // We keep the modal for specific "quick actions" if needed, but primarily use full pages now.
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false); 
+
+  // STRICT SCROLL HANDLING:
+  // This ensures the app ALWAYS starts at the top (0,0) on load/refresh,
+  // overriding mobile browser "scroll restoration" features.
+  useLayoutEffect(() => {
+    // 1. Disable browser's default scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
+    // 2. Force scroll to top immediately
+    window.scrollTo(0, 0);
+
+    // 3. Fallback for slower mobile rendering cycles
+    const timeoutId = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 50);
+
+    return () => clearTimeout(timeoutId);
+  }, []); // Empty dependency array = runs only on mount (initial load/refresh)
 
   const renderPage = () => {
     switch (currentPage) {
@@ -48,6 +69,7 @@ const AppContent: React.FC = () => {
         {renderPage()}
       </main>
       <Footer />
+      <ScrollToTopButton />
       {/* Keeping modal available if we want to re-enable it for specific smaller buttons later, currently unused in favor of DemoPage */}
       <DemoRequestModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
     </div>

@@ -75,7 +75,8 @@ import {
   Ban,
   Percent,
   History,
-  FileWarning
+  FileWarning,
+  ArrowUp
 } from 'lucide-react';
 
 export {
@@ -155,5 +156,6 @@ export {
   Ban,
   Percent,
   History,
-  FileWarning
+  FileWarning,
+  ArrowUp
 };
