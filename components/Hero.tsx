@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle2, ArrowRight, BrainCircuit } from './Icons';
 import { useNavigation } from '../contexts/NavigationContext';
 
 // Removed Props interface as we use context now
 const Hero: React.FC = () => {
   const { navigate } = useNavigation();
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   return (
     <div className="relative bg-slate-900 overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-28">
@@ -19,15 +24,19 @@ const Hero: React.FC = () => {
           
           {/* Text Content */}
           <div className="text-center lg:text-left">
-            <div className="inline-flex items-center px-3 py-1 rounded-full bg-brand-900/50 border border-brand-700 text-brand-300 text-sm font-medium mb-6">
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-brand-900/50 border border-brand-700 text-white text-sm font-medium mb-6">
               <span className="flex h-2 w-2 rounded-full bg-brand-400 mr-2 animate-pulse"></span>
               The #1 EdTech Ecosystem for India
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
-              Modernize Your Institute. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-500">
-                Empower Your Future.
+              <span className={`inline-block transition-all duration-700 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'} hover:text-brand-400 hover:-translate-y-1 cursor-default`}>
+                Modernize
+              </span> Your Institute. <br />
+              <span className={`inline-block transition-all duration-700 delay-200 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-500">
+                  <span className="inline-block transition-transform duration-300 hover:scale-110 cursor-default">Empower</span> Your Future.
+                </span>
               </span>
             </h1>
             
