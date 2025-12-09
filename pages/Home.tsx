@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Hero from '../components/Hero';
 import Features from '../components/Features';
 import Marketplace from '../components/Marketplace';
@@ -10,6 +10,11 @@ import { useNavigation } from '../contexts/NavigationContext';
 
 const Home: React.FC = () => {
   const { navigate } = useNavigation();
+
+  // Ensure page always starts at the top when Home component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <>
