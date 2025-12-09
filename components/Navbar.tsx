@@ -29,12 +29,24 @@ const Navbar: React.FC = () => {
          const element = document.getElementById('products');
          if (element) element.scrollIntoView({ behavior: 'smooth' });
       }
+    } else if (target === 'ecosystem') {
+      if (currentPage !== 'home') {
+        navigate('home');
+        setTimeout(() => {
+           const element = document.getElementById('ecosystem');
+           if (element) element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+         const element = document.getElementById('ecosystem');
+         if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }
     } else if (target === 'pricing') {
       navigate('pricing');
     } else if (target === 'demo') {
       navigate('demo');
     } else if (target === 'home') {
       navigate('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -55,13 +67,19 @@ const Navbar: React.FC = () => {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
             <button
+              onClick={() => handleNavClick('home')}
+              className={`font-medium hover:text-brand-500 transition-colors ${scrolled || currentPage !== 'home' ? 'text-slate-600' : 'text-slate-100'}`}
+            >
+              Home
+            </button>
+            <button
               onClick={() => handleNavClick('home-section')}
               className={`font-medium hover:text-brand-500 transition-colors ${scrolled || currentPage !== 'home' ? 'text-slate-600' : 'text-slate-100'}`}
             >
               Products
             </button>
              <button
-              onClick={() => handleNavClick('home')}
+              onClick={() => handleNavClick('ecosystem')}
               className={`font-medium hover:text-brand-500 transition-colors ${scrolled || currentPage !== 'home' ? 'text-slate-600' : 'text-slate-100'}`}
             >
               Ecosystem
@@ -96,7 +114,9 @@ const Navbar: React.FC = () => {
       {isOpen && (
         <div className="md:hidden bg-white absolute top-full left-0 w-full shadow-lg border-t">
           <div className="px-4 pt-2 pb-6 space-y-2 flex flex-col">
+            <button onClick={() => handleNavClick('home')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Home</button>
             <button onClick={() => handleNavClick('home-section')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Products</button>
+            <button onClick={() => handleNavClick('ecosystem')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Ecosystem</button>
             <button onClick={() => handleNavClick('pricing')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Pricing</button>
             <button onClick={() => handleNavClick('demo')} className="w-full mt-4 bg-brand-600 text-white px-5 py-3 rounded-lg font-bold">
               Get Started
