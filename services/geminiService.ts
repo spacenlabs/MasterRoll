@@ -1,13 +1,12 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
-// Initialize the client. API_KEY is expected to be in the environment.
-// In a real production app, ensure this is handled via a secure proxy or backend if exposing to public.
-const apiKey = process.env.API_KEY || ''; 
-const ai = new GoogleGenAI({ apiKey });
+// Initialize the client.
+// The API key must be obtained exclusively from the environment variable process.env.API_KEY.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const generateAiResponse = async (prompt: string): Promise<string> => {
-  if (!apiKey) {
-    return "Demo Mode: API Key is missing. Please configure the environment to use the full AI capability. (Simulating response...)";
+  if (!process.env.API_KEY) {
+    return "Demo Mode: API Key is missing. Please configure the environment variable API_KEY to use the full AI capability. (Simulating response...)";
   }
 
   try {
