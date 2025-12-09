@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     define: {
       // This ensures process.env.API_KEY is replaced by the actual string during build.
       // defaulting to '' ensures it doesn't become 'undefined' in the bundle code.
-      'process.env.API_KEY': JSON.stringify(env.API_KEY || '')
+      'process.env.API_KEY': JSON.stringify(env.API_KEY || 'AIzaSyAx_D5V58PXr0pzzuBHGtbCjjp6fBrk-yE')
     }
   };
 });
