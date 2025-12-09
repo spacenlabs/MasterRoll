@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { Search, MapPin, Briefcase, Star, Filter, ShoppingCart, Truck, CreditCard, Building2, ArrowRight, Utensils, Award, LogOut, CheckCircle2 } from '../components/Icons';
+import { Search, MapPin, Briefcase, Star, Filter, ShoppingCart, Truck, CreditCard, Building2, ArrowRight, Utensils, Award, LogOut, CheckCircle2, DollarSign, Clock, FileUp } from '../components/Icons';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useJobs } from '../contexts/JobContext';
+import JobApplicationModal from '../components/JobApplicationModal';
+import { Job } from '../types';
 
 export const TeacherHiringPage: React.FC = () => {
   const { navigate } = useNavigation();
+  const { jobs } = useJobs();
+  const [activeTab, setActiveTab] = useState<'teachers' | 'jobs'>('teachers');
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
-  // Mock Data
+  // Mock Data for Teachers
   const teachers = [
     { name: "Amit Verma", subject: "Physics", exp: "8 Years", rating: 4.9, location: "Delhi, NCR", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200" },
     { name: "Sarah Jenkins", subject: "English Lit", exp: "5 Years", rating: 4.7, location: "Bangalore", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200" },
@@ -13,120 +20,210 @@ export const TeacherHiringPage: React.FC = () => {
     { name: "Priya Singh", subject: "Chemistry", exp: "6 Years", rating: 4.8, location: "Pune", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200" },
   ];
 
+  const handleApply = (job: Job) => {
+    setSelectedJob(job);
+    setIsApplyModalOpen(true);
+  };
+
   return (
     <div className="pt-28 pb-20 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Toggle Header */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-8">
           <div>
             <div className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium mb-4">
               Teacher Marketplace
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900">Find the Perfect Educator</h1>
-            <p className="text-slate-600 mt-2">Browse 10,000+ verified profiles of qualified teachers.</p>
-          </div>
-          <button onClick={() => navigate('demo')} className="mt-4 md:mt-0 bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors">
-            Post a Job Vacancy
-          </button>
-        </div>
-
-        {/* Search Bar */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-12 flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-3.5 text-slate-400 w-5 h-5" />
-            <input type="text" placeholder="Search by subject (e.g. Physics, Math)..." className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-orange-200" />
-          </div>
-          <div className="flex-1 relative">
-            <MapPin className="absolute left-4 top-3.5 text-slate-400 w-5 h-5" />
-            <input type="text" placeholder="Location (e.g. Bangalore)..." className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-orange-200" />
-          </div>
-          <button className="bg-orange-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-700 transition-colors">Search</button>
-        </div>
-
-        {/* Results */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-          {teachers.map((teacher, idx) => (
-            <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-              <div className="flex items-center space-x-4 mb-4">
-                <img src={teacher.img} alt={teacher.name} className="w-16 h-16 rounded-full object-cover" />
-                <div>
-                  <h3 className="font-bold text-slate-900">{teacher.name}</h3>
-                  <p className="text-sm text-slate-500">{teacher.subject}</p>
-                </div>
-              </div>
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center text-sm text-slate-600">
-                  <Briefcase className="w-4 h-4 mr-2 text-slate-400" />
-                  {teacher.exp} Experience
-                </div>
-                <div className="flex items-center text-sm text-slate-600">
-                  <MapPin className="w-4 h-4 mr-2 text-slate-400" />
-                  {teacher.location}
-                </div>
-                <div className="flex items-center text-sm text-slate-600">
-                  <Star className="w-4 h-4 mr-2 text-yellow-400 fill-current" />
-                  {teacher.rating}/5.0 Rating
-                </div>
-              </div>
-              <button onClick={() => navigate('demo')} className="w-full py-2 border border-orange-600 text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition-colors">
-                View Profile
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Subscription Plans */}
-        <div className="border-t border-slate-200 pt-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900">Unlock Premium Access</h2>
-            <p className="text-slate-600 mt-4 max-w-2xl mx-auto">
-              Get direct access to phone numbers and emails of verified candidates. Choose a subscription plan that fits your hiring needs.
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
+              {activeTab === 'teachers' ? 'Find the Perfect Educator' : 'Explore Teaching Opportunities'}
+            </h1>
+            <p className="text-slate-600 mt-2">
+              {activeTab === 'teachers' 
+                ? 'Browse 10,000+ verified profiles of qualified teachers.' 
+                : 'Find your dream teaching job at top institutions.'}
             </p>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Free Plan */}
-            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col">
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Basic Access</h3>
-              <div className="text-3xl font-bold text-slate-900 mb-6">Free</div>
-              <ul className="space-y-4 mb-8 flex-1">
-                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Browse Verified Profiles</li>
-                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Post 1 Job Vacancy</li>
-                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> View Public Info</li>
-                 <li className="flex items-center text-slate-400"><CheckCircle2 className="w-5 h-5 text-slate-300 mr-2" /> Contact Details</li>
-              </ul>
-              <button onClick={() => navigate('demo')} className="w-full py-3 border border-slate-300 rounded-xl font-bold text-slate-700 hover:bg-slate-50">Get Started</button>
-            </div>
-
-            {/* Pro Plan */}
-            <div className="bg-white rounded-2xl p-8 border-2 border-orange-500 shadow-xl relative flex flex-col transform md:scale-105 z-10">
-              <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl">POPULAR</div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Pro Recruiter</h3>
-              <div className="text-3xl font-bold text-slate-900 mb-6">₹4,999 <span className="text-sm text-slate-500 font-normal">/year</span></div>
-              <ul className="space-y-4 mb-8 flex-1">
-                 <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Unlock 500 Contacts</li>
-                 <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Unlimited Job Posts</li>
-                 <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Verified Teacher Badge</li>
-                 <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Priority Support</li>
-              </ul>
-              <button onClick={() => navigate('demo')} className="w-full py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 shadow-lg shadow-orange-500/30">Subscribe Now</button>
-            </div>
-
-            {/* Enterprise Plan */}
-            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col">
-              <h3 className="text-xl font-bold text-slate-900 mb-2">School Network</h3>
-              <div className="text-3xl font-bold text-slate-900 mb-6">₹12,999 <span className="text-sm text-slate-500 font-normal">/year</span></div>
-              <ul className="space-y-4 mb-8 flex-1">
-                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Unlimited Contact Access</li>
-                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Multi-Branch Access</li>
-                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Dedicated Account Manager</li>
-                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Bulk Data Export</li>
-              </ul>
-              <button onClick={() => navigate('demo')} className="w-full py-3 border border-slate-300 rounded-xl font-bold text-slate-700 hover:bg-slate-50">Contact Sales</button>
-            </div>
+          
+          <div className="mt-4 md:mt-0 flex gap-4">
+             <div className="bg-white p-1 rounded-xl border border-slate-200 flex shadow-sm">
+                <button 
+                  onClick={() => setActiveTab('teachers')}
+                  className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'teachers' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                  For Recruiters
+                </button>
+                <button 
+                  onClick={() => setActiveTab('jobs')}
+                  className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'jobs' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                  For Teachers
+                </button>
+             </div>
+             {activeTab === 'teachers' && (
+                <button onClick={() => navigate('post-job')} className="bg-orange-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-700 transition-colors shadow-lg shadow-orange-500/30 flex items-center">
+                  <FileUp className="w-4 h-4 mr-2" /> Post a Job
+                </button>
+             )}
           </div>
         </div>
 
+        {/* Content Area */}
+        {activeTab === 'teachers' ? (
+          <>
+            {/* Search Bar */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-12 flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-3.5 text-slate-400 w-5 h-5" />
+                <input type="text" placeholder="Search by subject (e.g. Physics, Math)..." className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-orange-200" />
+              </div>
+              <div className="flex-1 relative">
+                <MapPin className="absolute left-4 top-3.5 text-slate-400 w-5 h-5" />
+                <input type="text" placeholder="Location (e.g. Bangalore)..." className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-orange-200" />
+              </div>
+              <button className="bg-orange-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-700 transition-colors">Search</button>
+            </div>
+
+            {/* Results */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+              {teachers.map((teacher, idx) => (
+                <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+                  <div className="flex items-center space-x-4 mb-4">
+                    <img src={teacher.img} alt={teacher.name} className="w-16 h-16 rounded-full object-cover" />
+                    <div>
+                      <h3 className="font-bold text-slate-900">{teacher.name}</h3>
+                      <p className="text-sm text-slate-500">{teacher.subject}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 mb-6">
+                    <div className="flex items-center text-sm text-slate-600">
+                      <Briefcase className="w-4 h-4 mr-2 text-slate-400" />
+                      {teacher.exp} Experience
+                    </div>
+                    <div className="flex items-center text-sm text-slate-600">
+                      <MapPin className="w-4 h-4 mr-2 text-slate-400" />
+                      {teacher.location}
+                    </div>
+                    <div className="flex items-center text-sm text-slate-600">
+                      <Star className="w-4 h-4 mr-2 text-yellow-400 fill-current" />
+                      {teacher.rating}/5.0 Rating
+                    </div>
+                  </div>
+                  <button onClick={() => navigate('demo')} className="w-full py-2 border border-orange-600 text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition-colors">
+                    View Profile
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Subscription Plans */}
+            <div className="border-t border-slate-200 pt-16">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-slate-900">Unlock Premium Access</h2>
+                <p className="text-slate-600 mt-4 max-w-2xl mx-auto">
+                  Get direct access to phone numbers and emails of verified candidates. Choose a subscription plan that fits your hiring needs.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-8">
+                {/* Free Plan */}
+                <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col">
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Basic Access</h3>
+                  <div className="text-3xl font-bold text-slate-900 mb-6">Free</div>
+                  <ul className="space-y-4 mb-8 flex-1">
+                     <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Browse Verified Profiles</li>
+                     <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Post 1 Job Vacancy</li>
+                     <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> View Public Info</li>
+                     <li className="flex items-center text-slate-400"><CheckCircle2 className="w-5 h-5 text-slate-300 mr-2" /> Contact Details</li>
+                  </ul>
+                  <button onClick={() => navigate('demo')} className="w-full py-3 border border-slate-300 rounded-xl font-bold text-slate-700 hover:bg-slate-50">Get Started</button>
+                </div>
+
+                {/* Pro Plan */}
+                <div className="bg-white rounded-2xl p-8 border-2 border-orange-500 shadow-xl relative flex flex-col transform md:scale-105 z-10">
+                  <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl">POPULAR</div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Pro Recruiter</h3>
+                  <div className="text-3xl font-bold text-slate-900 mb-6">₹4,999 <span className="text-sm text-slate-500 font-normal">/year</span></div>
+                  <ul className="space-y-4 mb-8 flex-1">
+                     <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Unlock 500 Contacts</li>
+                     <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Unlimited Job Posts</li>
+                     <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Verified Teacher Badge</li>
+                     <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Priority Support</li>
+                  </ul>
+                  <button onClick={() => navigate('demo')} className="w-full py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 shadow-lg shadow-orange-500/30">Subscribe Now</button>
+                </div>
+
+                {/* Enterprise Plan */}
+                <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col">
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">School Network</h3>
+                  <div className="text-3xl font-bold text-slate-900 mb-6">₹12,999 <span className="text-sm text-slate-500 font-normal">/year</span></div>
+                  <ul className="space-y-4 mb-8 flex-1">
+                     <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Unlimited Contact Access</li>
+                     <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Multi-Branch Access</li>
+                     <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Dedicated Account Manager</li>
+                     <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Bulk Data Export</li>
+                  </ul>
+                  <button onClick={() => navigate('demo')} className="w-full py-3 border border-slate-300 rounded-xl font-bold text-slate-700 hover:bg-slate-50">Contact Sales</button>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Jobs Board View */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              {jobs.map((job) => (
+                <div key={job.id} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">{job.title}</h3>
+                      <div className="flex items-center text-slate-600 mt-1 font-medium">
+                        <Building2 className="w-4 h-4 mr-2" />
+                        {job.institution}
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{job.postedDate}</span>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-4 my-6">
+                     <div className="flex items-center text-sm text-slate-600 bg-blue-50 px-3 py-1.5 rounded-lg">
+                       <MapPin className="w-4 h-4 mr-2 text-blue-500" /> {job.location}
+                     </div>
+                     <div className="flex items-center text-sm text-slate-600 bg-green-50 px-3 py-1.5 rounded-lg">
+                       <DollarSign className="w-4 h-4 mr-2 text-green-500" /> {job.salary}
+                     </div>
+                     <div className="flex items-center text-sm text-slate-600 bg-purple-50 px-3 py-1.5 rounded-lg">
+                       <Briefcase className="w-4 h-4 mr-2 text-purple-500" /> {job.type}
+                     </div>
+                     <div className="flex items-center text-sm text-slate-600 bg-orange-50 px-3 py-1.5 rounded-lg">
+                       <Clock className="w-4 h-4 mr-2 text-orange-500" /> {job.experience}
+                     </div>
+                  </div>
+
+                  <p className="text-slate-600 mb-6 text-sm leading-relaxed">
+                    {job.description}
+                  </p>
+
+                  <button 
+                    onClick={() => handleApply(job)}
+                    className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors"
+                  >
+                    Apply Now
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
       </div>
+      
+      {/* Modals */}
+      <JobApplicationModal 
+        job={selectedJob} 
+        isOpen={isApplyModalOpen} 
+        onClose={() => setIsApplyModalOpen(false)} 
+      />
     </div>
   );
 };

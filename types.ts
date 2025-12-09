@@ -34,11 +34,33 @@ export interface ChatMessage {
   isThinking?: boolean;
 }
 
+export interface Job {
+  id: string;
+  title: string;
+  institution: string;
+  location: string;
+  salary: string;
+  type: string; // Full-time, Part-time
+  experience: string;
+  description: string;
+  postedDate: string;
+}
+
+export interface JobApplication {
+  jobId: string;
+  name: string;
+  email: string;
+  phone: string;
+  coverLetter: string;
+  cvFileName: string;
+}
+
 export type Page = 
   | 'home' 
   | 'demo' 
   | 'pricing' 
   | 'teacher-hiring' 
+  | 'post-job'
   | 'vendor-marketplace' 
   | 'vendor-registration'
   | 'vendor-dashboard'

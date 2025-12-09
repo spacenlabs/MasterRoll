@@ -4,12 +4,14 @@ import Footer from './components/Footer';
 import DemoRequestModal from './components/DemoRequestModal';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
+import { JobProvider } from './contexts/JobContext';
 
 // Pages
 import Home from './pages/Home';
 import DemoPage from './pages/DemoPage';
 import PricingPage from './pages/PricingPage';
 import { TeacherHiringPage, VendorMarketplacePage } from './pages/MarketplacePages';
+import JobPostingPage from './pages/JobPostingPage';
 import VendorRegistrationPage from './pages/VendorRegistrationPage';
 import VendorDashboardPage from './pages/VendorDashboardPage';
 import { BookClassPage, ListInstitutePage } from './pages/TuitionPages';
@@ -42,6 +44,7 @@ const AppContent: React.FC = () => {
       case 'demo': return <DemoPage />;
       case 'pricing': return <PricingPage />;
       case 'teacher-hiring': return <TeacherHiringPage />;
+      case 'post-job': return <JobPostingPage />;
       case 'vendor-marketplace': return <VendorMarketplacePage />;
       case 'vendor-registration': return <VendorRegistrationPage />;
       case 'vendor-dashboard': return <VendorDashboardPage />;
@@ -72,7 +75,9 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <NavigationProvider>
-      <AppContent />
+      <JobProvider>
+        <AppContent />
+      </JobProvider>
     </NavigationProvider>
   );
 }

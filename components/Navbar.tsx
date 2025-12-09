@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, School } from './Icons';
+import { Menu, X, School, ArrowLeft } from './Icons';
 import { useNavigation } from '../contexts/NavigationContext';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { navigate, currentPage } = useNavigation();
+  const { navigate, currentPage, goBack, canGoBack } = useNavigation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,15 +54,31 @@ const Navbar: React.FC = () => {
     <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled || currentPage !== 'home' ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
-          {/* Logo */}
-          <button onClick={() => handleNavClick('home')} className="flex items-center space-x-2 focus:outline-none">
-            <div className="bg-brand-600 p-2 rounded-lg">
-              <School className="h-6 w-6 text-white" />
-            </div>
-            <span className={`text-2xl font-bold ${scrolled || currentPage !== 'home' ? 'text-slate-900' : 'text-slate-900 md:text-white'}`}>
-              Master<span className="text-brand-600">Roll</span>
-            </span>
-          </button>
+          {/* Logo & Back Button */}
+          <div className="flex items-center gap-3">
+            {canGoBack && (
+              <button 
+                onClick={goBack}
+                className={`p-2 rounded-full transition-colors ${
+                  scrolled || currentPage !== 'home' 
+                    ? 'text-slate-600 hover:bg-slate-100' 
+                    : 'text-white hover:bg-white/20'
+                }`}
+                aria-label="Go Back"
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </button>
+            )}
+
+            <button onClick={() => handleNavClick('home')} className="flex items-center space-x-2 focus:outline-none">
+              <div className="bg-brand-600 p-2 rounded-lg">
+                <School className="h-6 w-6 text-white" />
+              </div>
+              <span className={`text-2xl font-bold ${scrolled || currentPage !== 'home' ? 'text-slate-900' : 'text-slate-900 md:text-white'}`}>
+                Master<span className="text-brand-600">Roll</span>
+              </span>
+            </button>
+          </div>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">

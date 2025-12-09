@@ -76,7 +76,11 @@ import {
   Percent,
   History,
   FileWarning,
-  ArrowUp
+  ArrowUp,
+  FileUp,
+  Upload,
+  Paperclip,
+  ArrowLeft
 } from 'lucide-react';
 
 export {
@@ -157,5 +161,9 @@ export {
   Percent,
   History,
   FileWarning,
-  ArrowUp
+  ArrowUp,
+  FileUp,
+  Upload,
+  Paperclip,
+  ArrowLeft
 };
