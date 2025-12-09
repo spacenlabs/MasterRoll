@@ -42,7 +42,7 @@ const SchoolERPPage: React.FC = () => {
       items: [
         "Fee Structure Config", "Online Fee Collection", "Offline Fee (Cash/Cheque)", "Partial Payments",
         "Fine & Concessions", "Scholarship Management", "Expense Management", "Income vs Expense",
-        "Tally Integration", "Payment Gateway Integration", "Invoice Generation", "Fee Defaulter List",
+        "Tally Integration", "Payment Gateway Integration", "Consolidated Invoices (Print & Email)", "Fee Defaulter List",
         "Daily Collection Reports", "Refund Management", "Staff Payroll Integration"
       ]
     },

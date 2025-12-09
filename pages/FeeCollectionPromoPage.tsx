@@ -25,6 +25,13 @@ const FeeCollectionPromoPage: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const scrollToForm = () => {
+    const element = document.getElementById('apply-form');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -115,11 +122,14 @@ const FeeCollectionPromoPage: React.FC = () => {
                 <p className="text-slate-400 text-lg max-w-3xl mx-auto mb-10">
                   Exclusively for selected Colleges & Universities in India. Eliminate leakage, automate reconciliation, and give your students a modern payment experience without paying a penny for the software.
                 </p>
-                <div className="inline-block animate-bounce">
-                  <a href="#apply-form" className="inline-flex items-center bg-brand-600 hover:bg-brand-500 text-white text-xl font-bold px-10 py-5 rounded-2xl shadow-xl shadow-brand-600/30 transition-all transform hover:scale-105">
+                <div className="inline-block">
+                  <button 
+                    onClick={scrollToForm} 
+                    className="inline-flex items-center bg-brand-600 hover:bg-brand-500 text-white text-xl font-bold px-10 py-5 rounded-2xl shadow-xl shadow-brand-600/30 transition-all transform hover:scale-105 cursor-pointer"
+                  >
                     Claim Your Free License
                     <ArrowRight className="ml-3 w-6 h-6" />
-                  </a>
+                  </button>
                 </div>
                 <p className="mt-4 text-xs text-slate-500 uppercase tracking-widest">No Credit Card Required • No Hidden Integration Fees</p>
               </div>
