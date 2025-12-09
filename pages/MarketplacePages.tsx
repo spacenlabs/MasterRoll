@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, MapPin, Briefcase, Star, Filter, ShoppingCart, Truck, CreditCard, Building2, ArrowRight, Utensils, Award, LogOut } from '../components/Icons';
+import { Search, MapPin, Briefcase, Star, Filter, ShoppingCart, Truck, CreditCard, Building2, ArrowRight, Utensils, Award, LogOut, CheckCircle2 } from '../components/Icons';
 import { useNavigation } from '../contexts/NavigationContext';
 
 export const TeacherHiringPage: React.FC = () => {
@@ -43,7 +43,7 @@ export const TeacherHiringPage: React.FC = () => {
         </div>
 
         {/* Results */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
           {teachers.map((teacher, idx) => (
             <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
               <div className="flex items-center space-x-4 mb-4">
@@ -73,6 +73,59 @@ export const TeacherHiringPage: React.FC = () => {
             </div>
           ))}
         </div>
+
+        {/* Subscription Plans */}
+        <div className="border-t border-slate-200 pt-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900">Unlock Premium Access</h2>
+            <p className="text-slate-600 mt-4 max-w-2xl mx-auto">
+              Get direct access to phone numbers and emails of verified candidates. Choose a subscription plan that fits your hiring needs.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Free Plan */}
+            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col">
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Basic Access</h3>
+              <div className="text-3xl font-bold text-slate-900 mb-6">Free</div>
+              <ul className="space-y-4 mb-8 flex-1">
+                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Browse Verified Profiles</li>
+                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Post 1 Job Vacancy</li>
+                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> View Public Info</li>
+                 <li className="flex items-center text-slate-400"><CheckCircle2 className="w-5 h-5 text-slate-300 mr-2" /> Contact Details</li>
+              </ul>
+              <button onClick={() => navigate('demo')} className="w-full py-3 border border-slate-300 rounded-xl font-bold text-slate-700 hover:bg-slate-50">Get Started</button>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="bg-white rounded-2xl p-8 border-2 border-orange-500 shadow-xl relative flex flex-col transform md:scale-105 z-10">
+              <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl">POPULAR</div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Pro Recruiter</h3>
+              <div className="text-3xl font-bold text-slate-900 mb-6">₹4,999 <span className="text-sm text-slate-500 font-normal">/year</span></div>
+              <ul className="space-y-4 mb-8 flex-1">
+                 <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Unlock 500 Contacts</li>
+                 <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Unlimited Job Posts</li>
+                 <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Verified Teacher Badge</li>
+                 <li className="flex items-center text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-orange-500 mr-2" /> Priority Support</li>
+              </ul>
+              <button onClick={() => navigate('demo')} className="w-full py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 shadow-lg shadow-orange-500/30">Subscribe Now</button>
+            </div>
+
+            {/* Enterprise Plan */}
+            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col">
+              <h3 className="text-xl font-bold text-slate-900 mb-2">School Network</h3>
+              <div className="text-3xl font-bold text-slate-900 mb-6">₹12,999 <span className="text-sm text-slate-500 font-normal">/year</span></div>
+              <ul className="space-y-4 mb-8 flex-1">
+                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Unlimited Contact Access</li>
+                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Multi-Branch Access</li>
+                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Dedicated Account Manager</li>
+                 <li className="flex items-center text-slate-600"><CheckCircle2 className="w-5 h-5 text-green-500 mr-2" /> Bulk Data Export</li>
+              </ul>
+              <button onClick={() => navigate('demo')} className="w-full py-3 border border-slate-300 rounded-xl font-bold text-slate-700 hover:bg-slate-50">Contact Sales</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
