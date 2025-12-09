@@ -24,10 +24,9 @@ const AppContent: React.FC = () => {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false); 
 
   // STRICT SCROLL HANDLING:
-  // This ensures the app ALWAYS starts at the top (0,0) on load/refresh,
-  // overriding mobile browser "scroll restoration" features.
+  // This ensures the app ALWAYS starts at the top (0,0) on load/refresh/navigation
   useLayoutEffect(() => {
-    // 1. Disable browser's default scroll restoration
+    // 1. Disable browser's default scroll restoration to prevent "remembering" scroll position
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
@@ -35,13 +34,7 @@ const AppContent: React.FC = () => {
     // 2. Force scroll to top immediately
     window.scrollTo(0, 0);
 
-    // 3. Fallback for slower mobile rendering cycles
-    const timeoutId = setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 50);
-
-    return () => clearTimeout(timeoutId);
-  }, []); // Empty dependency array = runs only on mount (initial load/refresh)
+  }, [currentPage]); // TRIGGER ON EVERY PAGE CHANGE
 
   const renderPage = () => {
     switch (currentPage) {

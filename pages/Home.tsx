@@ -11,7 +11,7 @@ import { useNavigation } from '../contexts/NavigationContext';
 const Home: React.FC = () => {
   const { navigate } = useNavigation();
 
-  // Ensure page always starts at the top when Home component mounts
+  // Double assurance: Ensure page always starts at the top when Home component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
