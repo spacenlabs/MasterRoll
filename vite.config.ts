@@ -10,9 +10,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // This ensures process.env.API_KEY is replaced by the actual string during build
-      // to satisfy the Google GenAI SDK requirement.
-      'process.env.API_KEY': JSON.stringify(env.API_KEY)
+      // This ensures process.env.API_KEY is replaced by the actual string during build.
+      // defaulting to '' ensures it doesn't become 'undefined' in the bundle code.
+      'process.env.API_KEY': JSON.stringify(env.API_KEY || '')
     }
   };
 });
