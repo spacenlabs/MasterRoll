@@ -55,6 +55,33 @@ export interface JobApplication {
   cvFileName: string;
 }
 
+export interface VendorProduct {
+  id: number;
+  name: string;
+  category: string;
+  price: string;
+  minOrder: string;
+  supplier: string;
+  rating: number;
+  image: string;
+}
+
+export interface TeacherProfile {
+  id: string;
+  name: string;
+  subject: string;
+  exp: string;
+  rating: number;
+  location: string;
+  img: string;
+  bio: string;
+  education: string;
+  skills: string[];
+  certifications: string[];
+  availability: string;
+  languages: string[];
+}
+
 export type Page = 
   | 'home' 
   | 'demo' 

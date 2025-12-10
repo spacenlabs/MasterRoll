@@ -80,7 +80,14 @@ import {
   FileUp,
   Upload,
   Paperclip,
-  ArrowLeft
+  ArrowLeft,
+  Mail,
+  Languages,
+  PenTool,
+  Eye,
+  RotateCcw,
+  Image as ImageIcon,
+  Save
 } from 'lucide-react';
 
 export {
@@ -165,5 +172,12 @@ export {
   FileUp,
   Upload,
   Paperclip,
-  ArrowLeft
+  ArrowLeft,
+  Mail,
+  Languages,
+  PenTool,
+  Eye,
+  RotateCcw,
+  ImageIcon,
+  Save
 };

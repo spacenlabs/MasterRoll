@@ -3,7 +3,9 @@ import { Search, MapPin, Briefcase, Star, Filter, ShoppingCart, Truck, CreditCar
 import { useNavigation } from '../contexts/NavigationContext';
 import { useJobs } from '../contexts/JobContext';
 import JobApplicationModal from '../components/JobApplicationModal';
-import { Job } from '../types';
+import QuoteRequestModal from '../components/QuoteRequestModal';
+import TeacherProfileModal from '../components/TeacherProfileModal';
+import { Job, VendorProduct, TeacherProfile } from '../types';
 
 export const TeacherHiringPage: React.FC = () => {
   const { navigate } = useNavigation();
@@ -11,18 +13,81 @@ export const TeacherHiringPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'teachers' | 'jobs'>('teachers');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState<TeacherProfile | null>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  // Mock Data for Teachers
-  const teachers = [
-    { name: "Amit Verma", subject: "Physics", exp: "8 Years", rating: 4.9, location: "Delhi, NCR", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200" },
-    { name: "Sarah Jenkins", subject: "English Lit", exp: "5 Years", rating: 4.7, location: "Bangalore", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200" },
-    { name: "Rahul Dravid", subject: "Mathematics", exp: "12 Years", rating: 5.0, location: "Mumbai", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200" },
-    { name: "Priya Singh", subject: "Chemistry", exp: "6 Years", rating: 4.8, location: "Pune", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200" },
+  // Expanded Mock Data for Teachers
+  const teachers: TeacherProfile[] = [
+    { 
+      id: '1',
+      name: "Amit Verma", 
+      subject: "Physics", 
+      exp: "8 Years", 
+      rating: 4.9, 
+      location: "Delhi, NCR", 
+      img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200",
+      bio: "Passionate Physics educator with a track record of coaching students for JEE Advanced. I believe in visualizing concepts rather than rote learning. Formerly Senior Faculty at Aakash Institute.",
+      education: "M.Sc Physics, DU",
+      skills: ["JEE Advanced", "Mechanics", "Electromagnetism", "Student Mentoring"],
+      certifications: ["CSIR NET Qualified", "Best Teacher Award 2022"],
+      availability: "Immediate",
+      languages: ["English", "Hindi"]
+    },
+    { 
+      id: '2',
+      name: "Sarah Jenkins", 
+      subject: "English Lit", 
+      exp: "5 Years", 
+      rating: 4.7, 
+      location: "Bangalore", 
+      img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
+      bio: "English Literature enthusiast focusing on creative writing and spoken English. I have experience teaching IGCSE and IB curriculums. I encourage critical thinking through literature.",
+      education: "MA English, JNU",
+      skills: ["Creative Writing", "Public Speaking", "IGCSE Curriculum", "Drama"],
+      certifications: ["TEFL Certified", "British Council Trainer"],
+      availability: "15 Days Notice",
+      languages: ["English", "French"]
+    },
+    { 
+      id: '3',
+      name: "Rahul Dravid", 
+      subject: "Mathematics", 
+      exp: "12 Years", 
+      rating: 5.0, 
+      location: "Mumbai", 
+      img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+      bio: "Veteran Mathematics teacher specializing in Calculus and Algebra. My students consistently score 95+ in Board exams. I make math fun and accessible for everyone.",
+      education: "B.Tech, IIT Bombay",
+      skills: ["Calculus", "Vedic Maths", "Olympiad Training", "Data Analysis"],
+      certifications: ["Mathematics Olympiad Coach", "Google Certified Educator"],
+      availability: "Immediate",
+      languages: ["English", "Hindi", "Marathi"]
+    },
+    { 
+      id: '4',
+      name: "Priya Singh", 
+      subject: "Chemistry", 
+      exp: "6 Years", 
+      rating: 4.8, 
+      location: "Pune", 
+      img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200",
+      bio: "Chemistry teacher with a love for organic reactions. I use 3D models and practical experiments to demonstrate molecular structures. Experience with NEET aspirants.",
+      education: "M.Sc Chemistry, Pune Univ",
+      skills: ["Organic Chemistry", "Lab Safety", "NEET Prep", "Online Teaching"],
+      certifications: ["NET Qualified", "Digital Pedagogy Certified"],
+      availability: "1 Month Notice",
+      languages: ["English", "Hindi"]
+    },
   ];
 
   const handleApply = (job: Job) => {
     setSelectedJob(job);
     setIsApplyModalOpen(true);
+  };
+
+  const handleViewProfile = (teacher: TeacherProfile) => {
+    setSelectedTeacher(teacher);
+    setIsProfileModalOpen(true);
   };
 
   return (
@@ -109,8 +174,11 @@ export const TeacherHiringPage: React.FC = () => {
                       {teacher.rating}/5.0 Rating
                     </div>
                   </div>
-                  <button onClick={() => navigate('demo')} className="w-full py-2 border border-orange-600 text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition-colors">
-                    View Profile
+                  <button 
+                    onClick={() => handleViewProfile(teacher)} 
+                    className="w-full py-2 border border-orange-600 text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition-colors"
+                  >
+                    View Complete Profile
                   </button>
                 </div>
               ))}
@@ -224,6 +292,11 @@ export const TeacherHiringPage: React.FC = () => {
         isOpen={isApplyModalOpen} 
         onClose={() => setIsApplyModalOpen(false)} 
       />
+      <TeacherProfileModal 
+        teacher={selectedTeacher}
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </div>
   );
 };
@@ -231,10 +304,12 @@ export const TeacherHiringPage: React.FC = () => {
 export const VendorMarketplacePage: React.FC = () => {
   const { navigate } = useNavigation();
   const [activeCategory, setActiveCategory] = useState("All");
+  const [quoteProduct, setQuoteProduct] = useState<VendorProduct | null>(null);
+  const [isQuoteOpen, setIsQuoteOpen] = useState(false);
 
   const categories = ["All", "Books", "Stationery", "Uniforms", "Electronics", "Furniture", "Lab Equipment", "Sports", "Cafeteria"];
 
-  const products = [
+  const products: VendorProduct[] = [
     {
       id: 1,
       name: "Complete NCERT Book Set (Class 1-12)",
@@ -340,6 +415,11 @@ export const VendorMarketplacePage: React.FC = () => {
   const filteredProducts = activeCategory === "All" 
     ? products 
     : products.filter(p => p.category === activeCategory);
+
+  const handleRequestQuote = (product: VendorProduct) => {
+    setQuoteProduct(product);
+    setIsQuoteOpen(true);
+  };
 
   return (
     <div className="pt-28 pb-20 bg-slate-50 min-h-screen">
@@ -450,7 +530,10 @@ export const VendorMarketplacePage: React.FC = () => {
                     {product.supplier}
                   </div>
                 </div>
-                <button onClick={() => navigate('demo')} className="w-full py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center">
+                <button 
+                  onClick={() => handleRequestQuote(product)}
+                  className="w-full py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center shadow-lg shadow-slate-900/10"
+                >
                   Request Quote
                 </button>
               </div>
@@ -484,6 +567,13 @@ export const VendorMarketplacePage: React.FC = () => {
         </div>
 
       </div>
+
+      {/* Quote Modal */}
+      <QuoteRequestModal 
+        product={quoteProduct}
+        isOpen={isQuoteOpen}
+        onClose={() => setIsQuoteOpen(false)}
+      />
     </div>
   );
 };
