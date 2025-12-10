@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { CheckCircle2, ArrowRight, BrainCircuit } from './Icons';
 import { useNavigation } from '../contexts/NavigationContext';
 
-// Removed Props interface as we use context now
 const Hero: React.FC = () => {
   const { navigate } = useNavigation();
   const [isVisible, setIsVisible] = useState(false);
@@ -32,17 +31,24 @@ const Hero: React.FC = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
               <span className={`inline-block transition-all duration-700 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'} hover:text-brand-400 hover:-translate-y-1 cursor-default`}>
                 Modernize
-              </span> Your Institute. <br />
+              </span> 
+              <span className={`inline-block transition-all duration-700 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+                 Your Institute.
+              </span>
+              <br />
               <span className={`inline-block transition-all duration-700 delay-200 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-500">
-                  <span className="inline-block transition-transform duration-300 hover:scale-110 cursor-default">Empower</span> Your Future.
+                  <span className="inline-block transition-transform duration-300 hover:scale-110 cursor-default">
+                     Empower
+                  </span>
+                   Your Future.
                 </span>
               </span>
             </h1>
             
-            <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+            <div className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
               From fee collection to AI-powered learning, MasterRoll unifies school management, teacher marketplaces, and student success into one seamless platform.
-            </p>
+            </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4 mb-10">
               <button 
@@ -77,10 +83,11 @@ const Hero: React.FC = () => {
           <div className="relative mx-auto lg:mx-0 w-full max-w-lg lg:max-w-none">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-700 bg-slate-800">
               <img 
-                src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=800" 
-                alt="Student using MasterRoll on laptop" 
+                src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=800"
+                alt="Institute Management Dashboard"
                 className="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity"
               />
+              
               {/* Floating Cards overlay */}
               <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg max-w-[200px] border border-gray-100 hidden md:block animate-bounce" style={{ animationDuration: '3s' }}>
                 <div className="flex items-center gap-3 mb-2">

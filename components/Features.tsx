@@ -78,7 +78,7 @@ const products: ProductModule[] = [
     category: 'Marketplace',
     title: 'Vendor Procurement',
     description: 'Bulk order school supplies at wholesale rates. From uniforms to smart boards, get it all here.',
-    image: 'https://images.unsplash.com/photo-1586769852044-692d6e37d74e?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800',
     features: [
       { title: 'Bulk Ordering', description: 'Streamlined workflows.', icon: <ShoppingCart size={18} /> },
       { title: 'Verified Vendors', description: 'Quality assured network.', icon: <ShieldCheck size={18} /> },
@@ -91,7 +91,7 @@ const products: ProductModule[] = [
     category: 'Operations',
     title: 'Transport & Security',
     description: 'Ensure student safety with live tracking and automated alerts for parents.',
-    image: 'https://images.unsplash.com/photo-1570126618953-d437136e8c03?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800',
     features: [
       { title: 'GPS Tracking', description: 'Live bus location.', icon: <Bus size={18} /> },
       { title: 'RFID Attendance', description: 'Automated boarding logs.', icon: <ShieldCheck size={18} /> },
@@ -128,6 +128,14 @@ const Features: React.FC = () => {
       navigate('teacher-hiring');
     } else if (productId === 'vendor') {
       navigate('vendor-marketplace');
+    } else if (productId === 'transport') {
+      navigate('transport-security');
+    } else if (productId === 'analytics') {
+      navigate('analytics-suite');
+    } else if (productId === 'ai') {
+      navigate('ai-doubt-solving');
+    } else if (productId === 'library') {
+      navigate('digital-library');
     } else {
       navigate('demo'); // Default fallback
     }

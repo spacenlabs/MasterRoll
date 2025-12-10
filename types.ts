@@ -82,6 +82,17 @@ export interface TeacherProfile {
   languages: string[];
 }
 
+export interface DigitalCourse {
+  id: string;
+  title: string;
+  thumbnail: string;
+  price: string;
+  sales: number;
+  revenue: string;
+  status: 'Active' | 'Draft' | 'Review';
+  rating: number;
+}
+
 export type Page = 
   | 'home' 
   | 'demo' 
@@ -93,7 +104,12 @@ export type Page =
   | 'vendor-dashboard'
   | 'book-class' 
   | 'list-institute'
+  | 'lms-dashboard'
   | 'teacher-features' 
   | 'student-tools'
   | 'school-erp'
-  | 'fee-collection-promo';
+  | 'fee-collection-promo'
+  | 'transport-security'
+  | 'analytics-suite'
+  | 'ai-doubt-solving'
+  | 'digital-library';

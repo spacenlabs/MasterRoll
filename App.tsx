@@ -18,6 +18,11 @@ import { BookClassPage, ListInstitutePage } from './pages/TuitionPages';
 import { TeacherFeaturesPage, StudentToolsPage } from './pages/FeaturePages';
 import SchoolERPPage from './pages/SchoolERPPage';
 import FeeCollectionPromoPage from './pages/FeeCollectionPromoPage';
+import LMSDashboardPage from './pages/LMSDashboardPage';
+import TransportSecurityPage from './pages/TransportSecurityPage';
+import AnalyticsSuitePage from './pages/AnalyticsSuitePage';
+import AIDoubtSolvingPage from './pages/AIDoubtSolvingPage';
+import DigitalLibraryPage from './pages/DigitalLibraryPage';
 import { Page } from './types';
 
 const AppContent: React.FC = () => {
@@ -34,7 +39,7 @@ const AppContent: React.FC = () => {
     }
 
     // 2. Force scroll to top immediately
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 
   }, [currentPage]); // TRIGGER ON EVERY PAGE CHANGE
 
@@ -50,10 +55,15 @@ const AppContent: React.FC = () => {
       case 'vendor-dashboard': return <VendorDashboardPage />;
       case 'book-class': return <BookClassPage />;
       case 'list-institute': return <ListInstitutePage />;
+      case 'lms-dashboard': return <LMSDashboardPage />;
       case 'teacher-features': return <TeacherFeaturesPage />;
       case 'student-tools': return <StudentToolsPage />;
       case 'school-erp': return <SchoolERPPage />;
       case 'fee-collection-promo': return <FeeCollectionPromoPage />;
+      case 'transport-security': return <TransportSecurityPage />;
+      case 'analytics-suite': return <AnalyticsSuitePage />;
+      case 'ai-doubt-solving': return <AIDoubtSolvingPage />;
+      case 'digital-library': return <DigitalLibraryPage />;
       default: return <Home />;
     }
   };

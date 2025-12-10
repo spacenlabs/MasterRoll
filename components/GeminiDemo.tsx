@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BrainCircuit, Send, User, Loader2, Sparkles } from 'lucide-react'; // Import locally to this file as well if needed, or stick to Icons export
+import { BrainCircuit, Send, User, Loader2, Sparkles } from './Icons';
 import { generateAiResponse } from '../services/geminiService';
 import { ChatMessage, ChatRole } from '../types';
 

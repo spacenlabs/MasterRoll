@@ -1,17 +1,31 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
-// Initialize the client.
-// The API key must be obtained exclusively from the environment variable process.env.API_KEY.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// We do not initialize the client at the top level to prevent runtime crashes
+// if the API key is missing during the initial script evaluation.
+let ai: GoogleGenAI | null = null;
+
+const getAiClient = (): GoogleGenAI | null => {
+  if (ai) return ai;
+  
+  if (!process.env.API_KEY) {
+    console.warn("API Key is missing.");
+    return null;
+  }
+
+  ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  return ai;
+};
 
 export const generateAiResponse = async (prompt: string): Promise<string> => {
-  if (!process.env.API_KEY) {
+  const client = getAiClient();
+
+  if (!client) {
     return "Demo Mode: API Key is missing. Please configure the environment variable API_KEY to use the full AI capability. (Simulating response...)";
   }
 
   try {
     const modelId = 'gemini-2.5-flash';
-    const response: GenerateContentResponse = await ai.models.generateContent({
+    const response: GenerateContentResponse = await client.models.generateContent({
       model: modelId,
       contents: prompt,
       config: {
