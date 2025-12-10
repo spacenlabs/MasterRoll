@@ -82,12 +82,7 @@ import {
   Paperclip,
   ArrowLeft,
   Mail,
-  Languages,
-  PenTool,
-  Eye,
-  RotateCcw,
-  Image as ImageIcon,
-  Save
+  Languages
 } from 'lucide-react';
 
 export {
@@ -174,10 +169,5 @@ export {
   Paperclip,
   ArrowLeft,
   Mail,
-  Languages,
-  PenTool,
-  Eye,
-  RotateCcw,
-  ImageIcon,
-  Save
+  Languages
 };

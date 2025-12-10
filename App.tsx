@@ -5,8 +5,6 @@ import DemoRequestModal from './components/DemoRequestModal';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
 import { JobProvider } from './contexts/JobContext';
-import { EditorProvider } from './contexts/EditorContext'; // Import Editor Context
-import EditorUI from './components/EditorUI'; // Import Editor UI
 
 // Pages
 import Home from './pages/Home';
@@ -68,7 +66,6 @@ const AppContent: React.FC = () => {
       </main>
       <Footer />
       <ScrollToTopButton />
-      <EditorUI /> {/* Add Floating Editor UI */}
       {/* Keeping modal available if we want to re-enable it for specific smaller buttons later, currently unused in favor of DemoPage */}
       <DemoRequestModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
     </div>
@@ -79,9 +76,7 @@ function App() {
   return (
     <NavigationProvider>
       <JobProvider>
-        <EditorProvider>
-          <AppContent />
-        </EditorProvider>
+        <AppContent />
       </JobProvider>
     </NavigationProvider>
   );
