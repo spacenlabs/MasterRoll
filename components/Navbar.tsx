@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, School, ArrowLeft } from './Icons';
+import { Menu, X, School, ArrowLeft, LogIn } from './Icons';
 import { useNavigation } from '../contexts/NavigationContext';
 
 const Navbar: React.FC = () => {
@@ -47,6 +47,8 @@ const Navbar: React.FC = () => {
     } else if (target === 'home') {
       navigate('home');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (target === 'login') {
+      navigate('login');
     }
   };
 
@@ -106,6 +108,13 @@ const Navbar: React.FC = () => {
             >
               Pricing
             </button>
+            <button
+              onClick={() => handleNavClick('login')}
+              className={`font-medium hover:text-brand-500 transition-colors flex items-center ${scrolled || currentPage !== 'home' ? 'text-slate-600' : 'text-slate-100'}`}
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Login
+            </button>
             <button 
               onClick={() => handleNavClick('demo')}
               className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-lg hover:shadow-brand-500/30"
@@ -134,6 +143,9 @@ const Navbar: React.FC = () => {
             <button onClick={() => handleNavClick('home-section')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Products</button>
             <button onClick={() => handleNavClick('ecosystem')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Ecosystem</button>
             <button onClick={() => handleNavClick('pricing')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Pricing</button>
+             <button onClick={() => handleNavClick('login')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md flex items-center">
+              <LogIn className="w-4 h-4 mr-2" /> Login
+            </button>
             <button onClick={() => handleNavClick('demo')} className="w-full mt-4 bg-brand-600 text-white px-5 py-3 rounded-lg font-bold">
               Get Started
             </button>

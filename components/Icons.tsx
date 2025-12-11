@@ -113,7 +113,12 @@ import {
   Bookmark,
   PlaySquare,
   FileQuestion,
-  DownloadCloud
+  DownloadCloud,
+  LogIn,
+  Shield,
+  Baby,
+  UserCheck,
+  Info
 } from 'lucide-react';
 
 export {
@@ -231,5 +236,10 @@ export {
   Bookmark,
   PlaySquare,
   FileQuestion,
-  DownloadCloud
+  DownloadCloud,
+  LogIn,
+  Shield,
+  Baby,
+  UserCheck,
+  Info
 };

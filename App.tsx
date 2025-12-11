@@ -23,6 +23,11 @@ import TransportSecurityPage from './pages/TransportSecurityPage';
 import AnalyticsSuitePage from './pages/AnalyticsSuitePage';
 import AIDoubtSolvingPage from './pages/AIDoubtSolvingPage';
 import DigitalLibraryPage from './pages/DigitalLibraryPage';
+import LoginPage from './pages/LoginPage';
+import { 
+  SuperAdminDashboard, OrgDashboard, TeacherDashboard, 
+  StudentDashboard, ParentDashboard 
+} from './pages/UserDashboards';
 import { Page } from './types';
 
 const AppContent: React.FC = () => {
@@ -42,6 +47,15 @@ const AppContent: React.FC = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 
   }, [currentPage]); // TRIGGER ON EVERY PAGE CHANGE
+
+  // Logic to hide Navbar/Footer on dashboard pages if desired, but for now we keep them or let the page handle it.
+  // Actually, standard dashboards usually replace the public navbar. 
+  // Let's hide the public Navbar/Footer for dashboard routes to give a true "app" feel.
+  const isDashboard = [
+    'vendor-dashboard', 'lms-dashboard', 'super-admin-dashboard', 
+    'org-dashboard', 'teacher-dashboard', 'student-dashboard', 
+    'parent-dashboard'
+  ].includes(currentPage);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -64,17 +78,23 @@ const AppContent: React.FC = () => {
       case 'analytics-suite': return <AnalyticsSuitePage />;
       case 'ai-doubt-solving': return <AIDoubtSolvingPage />;
       case 'digital-library': return <DigitalLibraryPage />;
+      case 'login': return <LoginPage />;
+      case 'super-admin-dashboard': return <SuperAdminDashboard />;
+      case 'org-dashboard': return <OrgDashboard />;
+      case 'teacher-dashboard': return <TeacherDashboard />;
+      case 'student-dashboard': return <StudentDashboard />;
+      case 'parent-dashboard': return <ParentDashboard />;
       default: return <Home />;
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
-      <Navbar />
+      {!isDashboard && <Navbar />}
       <main className="flex-grow">
         {renderPage()}
       </main>
-      <Footer />
+      {!isDashboard && <Footer />}
       <ScrollToTopButton />
       {/* Keeping modal available if we want to re-enable it for specific smaller buttons later, currently unused in favor of DemoPage */}
       <DemoRequestModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />

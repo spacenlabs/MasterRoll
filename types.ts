@@ -112,4 +112,10 @@ export type Page =
   | 'transport-security'
   | 'analytics-suite'
   | 'ai-doubt-solving'
-  | 'digital-library';
+  | 'digital-library'
+  | 'login'
+  | 'super-admin-dashboard'
+  | 'org-dashboard'
+  | 'teacher-dashboard'
+  | 'student-dashboard'
+  | 'parent-dashboard';
