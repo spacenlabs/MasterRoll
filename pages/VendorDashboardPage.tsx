@@ -3,9 +3,10 @@ import {
   LayoutDashboard, ShoppingBag, Package, MessageSquare, 
   Settings, LogOut, TrendingUp, Plus, Search, 
   MoreVertical, Filter, ArrowRight, Send, CheckCircle2,
-  User
+  User, Loader2
 } from '../components/Icons';
 import { useNavigation } from '../contexts/NavigationContext';
+import { generateAiResponse } from '../services/geminiService';
 
 type Tab = 'overview' | 'listings' | 'orders' | 'support';
 
@@ -15,32 +16,56 @@ const VendorDashboardPage: React.FC = () => {
   
   // Chat State
   const [chatMessages, setChatMessages] = useState([
-    { id: 1, sender: 'support', text: 'Hello! Welcome to the MasterRoll Vendor Support. How can we assist you today?', time: '10:00 AM' }
+    { id: 1, sender: 'support', text: 'Hello! Welcome to MasterRoll Vendor Support. I am your AI assistant. How can I help you manage your school supplies business today?', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
   ]);
   const [chatInput, setChatInput] = useState('');
+  const [isAiThinking, setIsAiThinking] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || isAiThinking) return;
     
-    setChatMessages(prev => [...prev, { id: Date.now(), sender: 'me', text: chatInput, time: 'Now' }]);
+    const userMessageText = chatInput;
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    setChatMessages(prev => [...prev, { id: Date.now(), sender: 'me', text: userMessageText, time: timestamp }]);
     setChatInput('');
+    setIsAiThinking(true);
     
-    // Auto-reply simulation
-    setTimeout(() => {
+    // Create context-aware prompt for Gemini
+    const supportPrompt = `The following is a support request from a Vendor on MasterRoll (a school procurement and ERP platform).
+    Vendor Question: "${userMessageText}"
+    
+    Instructions:
+    - You are the 'MasterRoll Vendor Success Agent'.
+    - Help the vendor with dashboard usage, listing products, or order fulfillment queries.
+    - Be professional, empathetic, and concise.
+    - If you don't know something specific about our internal policies, ask them to wait for a human agent.`;
+
+    try {
+      const aiResponse = await generateAiResponse(supportPrompt);
       setChatMessages(prev => [...prev, { 
         id: Date.now() + 1, 
         sender: 'support', 
-        text: 'Thanks for reaching out. A support agent will review your query and reply shortly.', 
-        time: 'Now' 
+        text: aiResponse, 
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
       }]);
-    }, 1000);
+    } catch (error) {
+      setChatMessages(prev => [...prev, { 
+        id: Date.now() + 1, 
+        sender: 'support', 
+        text: "I'm having trouble connecting right now. Please try again or email support@masterroll.in", 
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      }]);
+    } finally {
+      setIsAiThinking(false);
+    }
   };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
+  }, [chatMessages, isAiThinking]);
 
 
   // Mock Data
@@ -205,35 +230,43 @@ const VendorDashboardPage: React.FC = () => {
 
       case 'support':
         return (
-          <div className="h-[calc(100vh-200px)] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="h-[calc(100vh-200px)] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white mr-3">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white mr-3 shadow-md">
                   <User size={20} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900">MasterRoll Support</h3>
-                  <p className="text-xs text-green-600 flex items-center"><span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span> Online</p>
+                  <h3 className="font-bold text-slate-900">MasterRoll Vendor Support</h3>
+                  <p className="text-xs text-green-600 flex items-center"><span className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span> Agent is Online</p>
                 </div>
               </div>
-              <button className="p-2 hover:bg-slate-200 rounded-lg text-slate-500">
+              <button className="p-2 hover:bg-slate-200 rounded-lg text-slate-500 transition-colors">
                 <MoreVertical size={20} />
               </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50 custom-scrollbar">
                {chatMessages.map((msg) => (
-                 <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                   <div className={`max-w-[70%] p-4 rounded-2xl ${
+                 <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-1 duration-200`}>
+                   <div className={`max-w-[80%] p-4 rounded-2xl shadow-sm ${
                      msg.sender === 'me' 
                      ? 'bg-blue-600 text-white rounded-br-none' 
-                     : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm'
+                     : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'
                    }`}>
-                     <p className="text-sm">{msg.text}</p>
-                     <p className={`text-[10px] mt-1 text-right ${msg.sender === 'me' ? 'text-blue-100' : 'text-slate-400'}`}>{msg.time}</p>
+                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                     <p className={`text-[10px] mt-1.5 text-right font-medium ${msg.sender === 'me' ? 'text-blue-100' : 'text-slate-400'}`}>{msg.time}</p>
                    </div>
                  </div>
                ))}
+               {isAiThinking && (
+                 <div className="flex justify-start animate-in fade-in duration-200">
+                    <div className="bg-white border border-slate-200 text-slate-500 rounded-2xl rounded-bl-none px-4 py-3 flex items-center gap-3 shadow-sm">
+                       <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                       <span className="text-xs font-medium">Agent is typing...</span>
+                    </div>
+                 </div>
+               )}
                <div ref={chatEndRef} />
             </div>
 
@@ -242,13 +275,14 @@ const VendorDashboardPage: React.FC = () => {
                 type="text" 
                 value={chatInput} 
                 onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Type your message..." 
-                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="How can we help with your listings or orders?" 
+                className="flex-1 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                disabled={isAiThinking}
               />
               <button 
                 type="submit"
-                disabled={!chatInput.trim()}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-colors"
+                disabled={!chatInput.trim() || isAiThinking}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white p-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 transform active:scale-95"
               >
                 <Send size={20} />
               </button>
@@ -264,36 +298,36 @@ const VendorDashboardPage: React.FC = () => {
   return (
     <div className="pt-20 bg-slate-50 min-h-screen flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 text-white hidden lg:flex flex-col fixed h-full top-0 pt-20 z-10 left-0">
+      <aside className="w-64 bg-slate-900 text-white hidden lg:flex flex-col fixed h-full top-0 pt-20 z-10 left-0 border-r border-slate-800">
         <div className="px-6 py-6 border-b border-slate-800">
           <h2 className="text-xl font-bold">Atlas Stationery</h2>
-          <p className="text-xs text-slate-400 mt-1">Vendor ID: VND-889</p>
+          <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Vendor ID: VND-889</p>
         </div>
         <nav className="flex-1 p-4 space-y-2">
           <button 
             onClick={() => setActiveTab('overview')}
-            className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === 'overview' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+            className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === 'overview' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
           >
             <LayoutDashboard size={20} className="mr-3" />
             Dashboard
           </button>
           <button 
              onClick={() => setActiveTab('listings')}
-             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === 'listings' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === 'listings' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
           >
             <Package size={20} className="mr-3" />
             My Products
           </button>
           <button 
              onClick={() => setActiveTab('orders')}
-             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === 'orders' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === 'orders' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
           >
             <ShoppingBag size={20} className="mr-3" />
             Orders
           </button>
           <button 
              onClick={() => setActiveTab('support')}
-             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === 'support' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === 'support' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
           >
             <MessageSquare size={20} className="mr-3" />
             Support Chat
@@ -302,7 +336,7 @@ const VendorDashboardPage: React.FC = () => {
         <div className="p-4 border-t border-slate-800 pb-24">
           <button onClick={() => navigate('vendor-marketplace')} className="w-full flex items-center px-4 py-3 text-red-400 hover:bg-slate-800 rounded-xl transition-all">
             <LogOut size={20} className="mr-3" />
-            Log Out
+            Exit Dashboard
           </button>
         </div>
       </aside>
@@ -310,11 +344,11 @@ const VendorDashboardPage: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 lg:ml-64 p-4 lg:p-8 pt-24 lg:pt-8">
         {/* Mobile Header Toggle (Simplified) */}
-        <div className="lg:hidden mb-6 flex justify-between items-center">
-           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <div className="lg:hidden mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+           <h1 className="text-xl font-bold text-slate-900">Vendor Portal</h1>
            <div className="flex gap-2">
-             <button onClick={() => setActiveTab('overview')} className="p-2 bg-white rounded-lg border border-slate-200"><LayoutDashboard size={20} /></button>
-             <button onClick={() => setActiveTab('support')} className="p-2 bg-white rounded-lg border border-slate-200"><MessageSquare size={20} /></button>
+             <button onClick={() => setActiveTab('overview')} className={`p-2 rounded-lg border transition-colors ${activeTab === 'overview' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-500'}`}><LayoutDashboard size={20} /></button>
+             <button onClick={() => setActiveTab('support')} className={`p-2 rounded-lg border transition-colors ${activeTab === 'support' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-500'}`}><MessageSquare size={20} /></button>
            </div>
         </div>
 

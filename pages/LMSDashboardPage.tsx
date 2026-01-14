@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Video, Users, DollarSign, Settings, LogOut, 
   Plus, Search, MoreVertical, PlayCircle, Star, TrendingUp, 
@@ -7,45 +7,41 @@ import {
 } from '../components/Icons';
 import { useNavigation } from '../contexts/NavigationContext';
 import { DigitalCourse } from '../types';
+import { fetchCourses, postCourse } from '../services/formService';
 
 const LMSDashboardPage: React.FC = () => {
   const { navigate, goBack } = useNavigation();
   const [activeTab, setActiveTab] = useState('courses');
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [courses, setCourses] = useState<DigitalCourse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock Data
-  const courses: DigitalCourse[] = [
-    {
-      id: '1',
-      title: 'Complete Python Bootcamp 2024',
-      thumbnail: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&q=80&w=400',
-      price: '₹499',
-      sales: 1240,
-      revenue: '₹6,18,760',
-      status: 'Active',
-      rating: 4.8
-    },
-    {
-      id: '2',
-      title: 'Vedic Maths Masterclass',
-      thumbnail: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?auto=format&fit=crop&q=80&w=400',
-      price: '₹299',
-      sales: 850,
-      revenue: '₹2,54,150',
-      status: 'Active',
-      rating: 4.9
-    },
-    {
-      id: '3',
-      title: 'IELTS Speaking Prep',
-      thumbnail: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400',
-      price: '₹999',
-      sales: 45,
-      revenue: '₹44,955',
-      status: 'Draft',
-      rating: 0
+  const loadCourses = async () => {
+    setIsLoading(true);
+    const data = await fetchCourses();
+    if (data.length > 0) {
+      setCourses(data);
+    } else {
+      // Mock data if DB empty
+      setCourses([
+        {
+          id: '1',
+          title: 'Complete Python Bootcamp 2024',
+          thumbnail: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&q=80&w=400',
+          price: '₹499',
+          sales: 1240,
+          revenue: '₹6,18,760',
+          status: 'Active',
+          rating: 4.8
+        }
+      ]);
     }
-  ];
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadCourses();
+  }, []);
 
   return (
     <div className="pt-20 bg-slate-50 min-h-screen flex">
@@ -155,64 +151,101 @@ const LMSDashboardPage: React.FC = () => {
           </button>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-           {courses.map((course) => (
-             <div key={course.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow group">
-                <div className="relative h-48 bg-slate-100">
-                   <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
-                   <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-                      {course.status}
-                   </div>
-                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button className="bg-white text-slate-900 px-6 py-2 rounded-full font-bold transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                        Manage Content
-                      </button>
-                   </div>
-                </div>
-                <div className="p-5">
-                   <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-slate-900 line-clamp-1 text-lg">{course.title}</h3>
-                      <button className="text-slate-400 hover:text-slate-600"><MoreVertical size={20} /></button>
-                   </div>
-                   <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
-                      <span className="flex items-center"><Users size={14} className="mr-1" /> {course.sales} Sales</span>
-                      <span className="flex items-center"><Star size={14} className="mr-1 text-yellow-500" /> {course.rating}</span>
-                   </div>
-                   <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                      <div>
-                        <p className="text-xs text-slate-500">Price</p>
-                        <p className="font-bold text-slate-900">{course.price}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-slate-500">Total Revenue</p>
-                        <p className="font-bold text-green-600">{course.revenue}</p>
-                      </div>
-                   </div>
-                </div>
-             </div>
-           ))}
-           
-           {/* Add New Placeholer */}
-           <button 
-             onClick={() => setIsUploadModalOpen(true)}
-             className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center h-full min-h-[300px] hover:bg-slate-100 hover:border-brand-400 transition-all group"
-           >
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                 <Plus className="w-8 h-8 text-slate-400 group-hover:text-brand-600" />
+        {isLoading ? (
+           <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="animate-spin h-10 w-10 text-brand-600 mb-4" />
+              <p className="text-slate-500 font-medium">Syncing courses with Supabase...</p>
+           </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {courses.map((course) => (
+              <div key={course.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow group">
+                  <div className="relative h-48 bg-slate-100">
+                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                        {course.status}
+                    </div>
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button className="bg-white text-slate-900 px-6 py-2 rounded-full font-bold transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                          Manage Content
+                        </button>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-slate-900 line-clamp-1 text-lg">{course.title}</h3>
+                        <button className="text-slate-400 hover:text-slate-600"><MoreVertical size={20} /></button>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
+                        <span className="flex items-center"><Users size={14} className="mr-1" /> {course.sales} Sales</span>
+                        <span className="flex items-center"><Star size={14} className="mr-1 text-yellow-500" /> {course.rating}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                        <div>
+                          <p className="text-xs text-slate-500">Price</p>
+                          <p className="font-bold text-slate-900">{course.price}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-slate-500">Total Revenue</p>
+                          <p className="font-bold text-green-600">{course.revenue}</p>
+                        </div>
+                    </div>
+                  </div>
               </div>
-              <h3 className="font-bold text-slate-600 group-hover:text-brand-700">Add New Course</h3>
-              <p className="text-sm text-slate-400 mt-1">Video, PDF, or Live</p>
-           </button>
-        </div>
+            ))}
+            
+            <button 
+              onClick={() => setIsUploadModalOpen(true)}
+              className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center h-full min-h-[300px] hover:bg-slate-100 hover:border-brand-400 transition-all group"
+            >
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                  <Plus className="w-8 h-8 text-slate-400 group-hover:text-brand-600" />
+                </div>
+                <h3 className="font-bold text-slate-600 group-hover:text-brand-700">Add New Course</h3>
+                <p className="text-sm text-slate-400 mt-1">Video, PDF, or Live</p>
+            </button>
+          </div>
+        )}
       </main>
 
-      <UploadCourseModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
+      <UploadCourseModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} onRefresh={loadCourses} />
     </div>
   );
 };
 
-const UploadCourseModal: React.FC<{isOpen: boolean; onClose: () => void}> = ({isOpen, onClose}) => {
+const UploadCourseModal: React.FC<{isOpen: boolean; onClose: () => void; onRefresh: () => void}> = ({isOpen, onClose, onRefresh}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [title, setTitle] = useState('');
+  const [price, setPrice] = useState('');
+  const [category, setCategory] = useState('Academic (School)');
+
   if (!isOpen) return null;
+
+  const handleSubmit = async () => {
+    if (!title || !price) {
+      alert("Please fill in course title and price.");
+      return;
+    }
+    setIsLoading(true);
+    const success = await postCourse({
+      title,
+      price: `₹${price}`,
+      category,
+      thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=400',
+      sales: 0,
+      revenue: '₹0',
+      status: 'Active',
+      rating: 5.0
+    });
+
+    if (success) {
+      onRefresh();
+      onClose();
+    } else {
+      alert("Failed to save course. Ensure the 'courses' table exists in Supabase.");
+    }
+    setIsLoading(false);
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -227,7 +260,13 @@ const UploadCourseModal: React.FC<{isOpen: boolean; onClose: () => void}> = ({is
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Course Title</label>
-                <input type="text" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none" placeholder="e.g. Master React JS in 30 Days" />
+                <input 
+                  type="text" 
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none" 
+                  placeholder="e.g. Master React JS in 30 Days" 
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-6">
@@ -235,12 +274,22 @@ const UploadCourseModal: React.FC<{isOpen: boolean; onClose: () => void}> = ({is
                     <label className="block text-sm font-bold text-slate-700 mb-2">Price (INR)</label>
                     <div className="relative">
                       <span className="absolute left-4 top-3.5 text-slate-500">₹</span>
-                      <input type="number" className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none" placeholder="499" />
+                      <input 
+                        type="number" 
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none" 
+                        placeholder="499" 
+                      />
                     </div>
                  </div>
                  <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Category</label>
-                    <select className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-brand-500 outline-none">
+                    <select 
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-brand-500 outline-none"
+                    >
                        <option>Academic (School)</option>
                        <option>Competitive Exams</option>
                        <option>Skill Development</option>
@@ -266,8 +315,12 @@ const UploadCourseModal: React.FC<{isOpen: boolean; onClose: () => void}> = ({is
 
          <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
             <button onClick={onClose} className="px-6 py-3 text-slate-600 font-bold hover:bg-slate-200 rounded-xl">Cancel</button>
-            <button onClick={onClose} className="px-8 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 shadow-lg shadow-brand-500/30">
-              Create & Publish
+            <button 
+              onClick={handleSubmit} 
+              disabled={isLoading}
+              className="px-8 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 shadow-lg shadow-brand-500/30 flex items-center justify-center min-w-[160px]"
+            >
+              {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : "Create & Publish"}
             </button>
          </div>
       </div>

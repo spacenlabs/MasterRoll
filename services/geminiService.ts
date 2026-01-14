@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
 // We do not initialize the client at the top level to prevent runtime crashes
@@ -24,7 +25,8 @@ export const generateAiResponse = async (prompt: string): Promise<string> => {
   }
 
   try {
-    const modelId = 'gemini-2.5-flash';
+    // Using gemini-3-pro-preview for complex reasoning tasks like academic tutoring
+    const modelId = 'gemini-3-pro-preview';
     const response: GenerateContentResponse = await client.models.generateContent({
       model: modelId,
       contents: prompt,
@@ -33,6 +35,7 @@ export const generateAiResponse = async (prompt: string): Promise<string> => {
       }
     });
 
+    // Access the text property directly from the GenerateContentResponse object.
     return response.text || "I'm having trouble thinking right now. Please try again.";
   } catch (error) {
     console.error("Gemini API Error:", error);

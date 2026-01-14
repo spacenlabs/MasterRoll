@@ -4,6 +4,7 @@ import {
   UploadCloud, CheckCircle2, Loader2, ArrowRight, Truck 
 } from '../components/Icons';
 import { useNavigation } from '../contexts/NavigationContext';
+import { submitForm } from '../services/formService';
 
 const VendorRegistrationPage: React.FC = () => {
   const { navigate } = useNavigation();
@@ -47,15 +48,17 @@ const VendorRegistrationPage: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    
+    const success = await submitForm('Vendor Registration', formData);
+
+    setIsLoading(false);
+    if (success) {
       setIsSuccess(true);
       window.scrollTo(0, 0);
-    }, 2000);
+    }
   };
 
   if (isSuccess) {
@@ -65,10 +68,10 @@ const VendorRegistrationPage: React.FC = () => {
           <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <CheckCircle2 size={48} />
           </div>
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Registration Successful!</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">Application Submitted!</h2>
           <p className="text-slate-600 mb-8 text-lg">
-            Thank you for registering with MasterRoll. Your application ID is <span className="font-mono font-bold text-slate-900">#MR-VND-2024-889</span>. 
-            Our procurement team will verify your GST and documents within 48 hours.
+            We have registered your details in our system. Your application ID is <span className="font-mono font-bold text-slate-800">VND-{Date.now().toString().slice(-6)}</span>.
+            <br/>Our procurement team will verify your GST and documents and contact you within 48 hours.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button onClick={() => navigate('home')} className="px-8 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors">

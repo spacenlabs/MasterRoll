@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Briefcase, Building2, MapPin, DollarSign, Clock, FileText, CheckCircle2, ArrowRight, Loader2 } from '../components/Icons';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useJobs } from '../contexts/JobContext';
-import { Job } from '../types';
+import { postJob } from '../services/formService';
 
 const JobPostingPage: React.FC = () => {
   const { navigate } = useNavigation();
-  const { addJob } = useJobs();
+  const { refreshJobs } = useJobs();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -26,13 +26,11 @@ const JobPostingPage: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Create new job object
-    const newJob: Job = {
-      id: Date.now().toString(),
+    const dbPayload = {
       title: formData.title,
       institution: formData.institution,
       location: formData.location,
@@ -40,15 +38,20 @@ const JobPostingPage: React.FC = () => {
       type: formData.type,
       experience: formData.experience,
       description: formData.description,
-      postedDate: 'Just now'
+      posted_date: 'Just now'
     };
 
-    setTimeout(() => {
-      addJob(newJob); // Add to context
+    const success = await postJob(dbPayload);
+
+    if (success) {
+      refreshJobs();
       setIsLoading(false);
       setIsSuccess(true);
       window.scrollTo(0, 0);
-    }, 1500);
+    } else {
+      setIsLoading(false);
+      alert("Failed to post job to Supabase. Ensure you've run the SQL script provided.");
+    }
   };
 
   if (isSuccess) {
@@ -60,10 +63,10 @@ const JobPostingPage: React.FC = () => {
           </div>
           <h2 className="text-3xl font-bold text-slate-900 mb-4">Job Posted Successfully!</h2>
           <p className="text-slate-600 mb-8">
-            Your vacancy for <span className="font-bold">{formData.title}</span> is now live on the Teacher Marketplace.
+            Your vacancy for <span className="font-bold">{formData.title}</span> is now live in the MasterRoll database and visible to all educators.
           </p>
           <button 
-            onClick={() => navigate('teacher-hiring')} // Redirects to the job board implicitly
+            onClick={() => navigate('teacher-hiring')} 
             className="w-full px-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors"
           >
             View Job Board
@@ -83,15 +86,13 @@ const JobPostingPage: React.FC = () => {
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Post a Job Vacancy</h1>
           <p className="text-slate-600">
-            Reach thousands of qualified educators. Fill in the details below to publish your listing instantly.
+            Connect your institution with the best talent via our Supabase-powered marketplace.
           </p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
           <div className="p-8 md:p-10">
             <form onSubmit={handleSubmit} className="space-y-8">
-              
-              {/* Basic Info */}
               <div>
                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center border-b pb-2">
                   <Briefcase className="w-5 h-5 mr-2 text-orange-600" />
@@ -140,7 +141,6 @@ const JobPostingPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Compensation */}
               <div>
                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center border-b pb-2">
                   <DollarSign className="w-5 h-5 mr-2 text-orange-600" />
@@ -188,7 +188,6 @@ const JobPostingPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Description */}
               <div>
                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center border-b pb-2">
                   <FileText className="w-5 h-5 mr-2 text-orange-600" />
@@ -227,7 +226,7 @@ const JobPostingPage: React.FC = () => {
                   {isLoading ? (
                     <>
                       <Loader2 className="animate-spin mr-2 h-6 w-6" />
-                      Publishing...
+                      Publishing to Supabase...
                     </>
                   ) : (
                     <>
@@ -237,11 +236,9 @@ const JobPostingPage: React.FC = () => {
                   )}
                 </button>
               </div>
-
             </form>
           </div>
         </div>
-
       </div>
     </div>
   );

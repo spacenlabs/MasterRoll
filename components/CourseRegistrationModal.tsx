@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, Loader2, User, Phone, BookOpen, Calendar } from './Icons';
+import { submitForm } from '../services/formService';
 
 interface CourseRegistrationModalProps {
   isOpen: boolean;
@@ -12,14 +13,20 @@ const CourseRegistrationModal: React.FC<CourseRegistrationModalProps> = ({ isOpe
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    const success = await submitForm('Course Registration', data);
+
+    setIsLoading(false);
+    if (success) {
       setIsSuccess(true);
-    }, 1500);
+    }
   };
 
   return (
@@ -45,7 +52,7 @@ const CourseRegistrationModal: React.FC<CourseRegistrationModalProps> = ({ isOpe
             </div>
             <h3 className="text-2xl font-bold text-slate-900 mb-2">Booking Confirmed!</h3>
             <p className="text-slate-600 mb-8">
-              Your registration request has been sent to the institute. You will receive a confirmation SMS and email shortly with the class schedule.
+              We have received your registration for the class. You will receive a confirmation SMS and payment link shortly.
             </p>
             <button 
               onClick={onClose}
@@ -72,6 +79,7 @@ const CourseRegistrationModal: React.FC<CourseRegistrationModalProps> = ({ isOpe
                      <User size={18} className="text-slate-400" />
                    </div>
                    <input 
+                     name="student_name"
                      required 
                      type="text" 
                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -83,7 +91,7 @@ const CourseRegistrationModal: React.FC<CourseRegistrationModalProps> = ({ isOpe
                <div className="grid grid-cols-2 gap-4">
                  <div>
                    <label className="block text-sm font-medium text-slate-700 mb-1">Grade / Class</label>
-                   <select className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white">
+                   <select name="grade" className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white">
                      <option>Class 8</option>
                      <option>Class 9</option>
                      <option>Class 10</option>
@@ -97,7 +105,7 @@ const CourseRegistrationModal: React.FC<CourseRegistrationModalProps> = ({ isOpe
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <BookOpen size={18} className="text-slate-400" />
                       </div>
-                      <select className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white">
+                      <select name="subject" className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white">
                         <option>Mathematics</option>
                         <option>Physics</option>
                         <option>Chemistry</option>
@@ -116,6 +124,7 @@ const CourseRegistrationModal: React.FC<CourseRegistrationModalProps> = ({ isOpe
                       <Phone size={18} className="text-slate-400" />
                     </div>
                     <input 
+                      name="parent_mobile"
                       required 
                       type="tel" 
                       className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -131,6 +140,7 @@ const CourseRegistrationModal: React.FC<CourseRegistrationModalProps> = ({ isOpe
                       <Calendar size={18} className="text-slate-400" />
                     </div>
                     <input 
+                      name="start_date"
                       type="date" 
                       className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                     />

@@ -1,14 +1,18 @@
-import React, { useState, useLayoutEffect } from 'react';
+
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import DemoRequestModal from './components/DemoRequestModal';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
 import { JobProvider } from './contexts/JobContext';
+import { syncSocialUser } from './services/formService';
+import { Loader2 } from './components/Icons';
 
 // Pages
 import Home from './pages/Home';
 import DemoPage from './pages/DemoPage';
+import SignupPage from './pages/SignupPage';
 import PricingPage from './pages/PricingPage';
 import { TeacherHiringPage, VendorMarketplacePage } from './pages/MarketplacePages';
 import JobPostingPage from './pages/JobPostingPage';
@@ -24,43 +28,84 @@ import AnalyticsSuitePage from './pages/AnalyticsSuitePage';
 import AIDoubtSolvingPage from './pages/AIDoubtSolvingPage';
 import DigitalLibraryPage from './pages/DigitalLibraryPage';
 import LoginPage from './pages/LoginPage';
+import CreateAdmissionPage from './pages/CreateAdmissionPage';
+import AdmissionEnquiryPage from './pages/AdmissionEnquiryPage';
+import SchoolSubscriptionPage from './pages/SchoolSubscriptionPage';
+import CreateBranchPage from './pages/CreateBranchPage';
+import OnlineAdmissionPublic from './pages/OnlineAdmissionPublic';
 import { 
   SuperAdminDashboard, OrgDashboard, TeacherDashboard, 
   StudentDashboard, ParentDashboard 
 } from './pages/UserDashboards';
-import { Page } from './types';
 
 const AppContent: React.FC = () => {
-  const { currentPage } = useNavigation();
-  // We keep the modal for specific "quick actions" if needed, but primarily use full pages now.
+  const { currentPage, navigate } = useNavigation();
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false); 
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  // STRICT SCROLL HANDLING:
-  // This ensures the app ALWAYS starts at the top (0,0) on load/refresh/navigation
+  // 1. Detect OAuth Callback on Mount
+  useEffect(() => {
+    const handleAuthCallback = async () => {
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token=')) {
+        setIsSyncing(true);
+        // Extract token
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get('access_token');
+        
+        if (accessToken) {
+          const result = await syncSocialUser(accessToken);
+          if (result.success && result.user) {
+            // Clean URL hash
+            window.history.replaceState(null, '', window.location.pathname);
+            
+            // Navigate based on synced user role
+            const roleMap: Record<string, any> = {
+              'super_admin': 'super-admin-dashboard',
+              'org': 'org-dashboard',
+              'teacher': 'teacher-dashboard',
+              'student': 'student-dashboard',
+              'parent': 'parent-dashboard',
+              'vendor': 'vendor-dashboard',
+            };
+            navigate(roleMap[result.user.role] || 'home');
+          }
+        }
+        setIsSyncing(false);
+      }
+    };
+    handleAuthCallback();
+  }, []);
+
   useLayoutEffect(() => {
-    // 1. Disable browser's default scroll restoration to prevent "remembering" scroll position
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
-
-    // 2. Force scroll to top immediately
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [currentPage]);
 
-  }, [currentPage]); // TRIGGER ON EVERY PAGE CHANGE
-
-  // Logic to hide Navbar/Footer on dashboard pages if desired, but for now we keep them or let the page handle it.
-  // Actually, standard dashboards usually replace the public navbar. 
-  // Let's hide the public Navbar/Footer for dashboard routes to give a true "app" feel.
   const isDashboard = [
     'vendor-dashboard', 'lms-dashboard', 'super-admin-dashboard', 
     'org-dashboard', 'teacher-dashboard', 'student-dashboard', 
-    'parent-dashboard'
+    'parent-dashboard', 'create-admission', 'admission-enquiry',
+    'school-subscription', 'create-branch'
   ].includes(currentPage);
 
   const renderPage = () => {
+    if (isSyncing) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <Loader2 className="animate-spin text-brand-600 h-12 w-12 mb-4" />
+          <h2 className="text-xl font-bold text-slate-900">Authenticating with Google...</h2>
+          <p className="text-slate-500">Please wait while we set up your MasterRoll workspace.</p>
+        </div>
+      );
+    }
+
     switch (currentPage) {
       case 'home': return <Home />;
       case 'demo': return <DemoPage />;
+      case 'signup': return <SignupPage />;
       case 'pricing': return <PricingPage />;
       case 'teacher-hiring': return <TeacherHiringPage />;
       case 'post-job': return <JobPostingPage />;
@@ -84,6 +129,11 @@ const AppContent: React.FC = () => {
       case 'teacher-dashboard': return <TeacherDashboard />;
       case 'student-dashboard': return <StudentDashboard />;
       case 'parent-dashboard': return <ParentDashboard />;
+      case 'create-admission': return <CreateAdmissionPage />;
+      case 'admission-enquiry': return <AdmissionEnquiryPage />;
+      case 'school-subscription': return <SchoolSubscriptionPage />;
+      case 'create-branch': return <CreateBranchPage />;
+      case 'online-admission-public': return <OnlineAdmissionPublic />;
       default: return <Home />;
     }
   };
@@ -96,7 +146,6 @@ const AppContent: React.FC = () => {
       </main>
       {!isDashboard && <Footer />}
       <ScrollToTopButton />
-      {/* Keeping modal available if we want to re-enable it for specific smaller buttons later, currently unused in favor of DemoPage */}
       <DemoRequestModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
     </div>
   );

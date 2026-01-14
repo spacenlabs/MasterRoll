@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Loader2, School, Phone, MessageCircle } from '../components/Icons';
+import { submitForm } from '../services/formService';
 
 const DemoPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    const success = await submitForm('Full Page Demo Request', data);
+
+    setIsLoading(false);
+    if (success) {
       setIsSuccess(true);
-    }, 1500);
+    }
   };
 
   return (
@@ -62,7 +70,7 @@ const DemoPage: React.FC = () => {
                 </div>
                 <div className="flex items-center text-slate-600">
                   <MessageCircle className="w-5 h-5 mr-3 text-slate-400" />
-                  sales@masterroll.in
+                  support@masterroll.in
                 </div>
               </div>
             </div>
@@ -75,9 +83,9 @@ const DemoPage: React.FC = () => {
                 <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
                   <CheckCircle2 size={40} />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">Request Submitted!</h3>
+                <h3 className="text-2xl font-bold text-slate-900 mb-4">Submission Successful!</h3>
                 <p className="text-slate-600 mb-8">
-                  Our team has received your details. You will receive a call within 24 hours to schedule your personalized walkthrough.
+                  We have successfully received your demo request. One of our education specialists will contact you at your provided email within 24 hours.
                 </p>
                 <button 
                   onClick={() => window.location.reload()}
@@ -93,32 +101,32 @@ const DemoPage: React.FC = () => {
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">First Name</label>
-                      <input required type="text" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
+                      <input name="first_name" required type="text" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Last Name</label>
-                      <input required type="text" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
+                      <input name="last_name" required type="text" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Institution Name</label>
-                    <input required type="text" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
+                    <input name="institution" required type="text" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
-                    <input required type="email" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
+                    <input name="email" required type="email" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Mobile Number</label>
-                    <input required type="tel" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
+                    <input name="phone" required type="tel" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Role</label>
-                    <select className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all bg-white">
+                    <select name="role" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all bg-white">
                       <option>Principal / Owner</option>
                       <option>Teacher</option>
                       <option>Administrator</option>
@@ -127,7 +135,7 @@ const DemoPage: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">What are you most interested in?</label>
-                    <select className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all bg-white">
+                    <select name="interest" className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all bg-white">
                       <option>Fee Management</option>
                       <option>Teacher Hiring</option>
                       <option>Student Learning Tools</option>
@@ -143,7 +151,7 @@ const DemoPage: React.FC = () => {
                     {isLoading ? (
                       <>
                         <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                        Submitting...
+                        Processing...
                       </>
                     ) : (
                       "Confirm Schedule"

@@ -1,62 +1,923 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, Users, CreditCard, School, LogOut, 
   TrendingUp, Activity, Bell, Calendar, BookOpen, 
-  UserCheck, Shield, FileText, Settings, Baby, GraduationCap,
-  CheckCircle2, AlertCircle, Clock, MapPin, Search, Plus, Filter,
-  MoreVertical, Download, Mail, Phone, DollarSign
+  UserCheck, Shield, FileText, Settings, Plus, Search, 
+  Filter, MoreVertical, Download, Mail, Phone, DollarSign, 
+  Loader2, CheckCircle2, AlertCircle, X, MapPin, UserPlus,
+  ArrowRight, Landmark, Zap, ClipboardList, Trash2,
+  GraduationCap, MessageSquare, Briefcase, Building2,
+  Baby, Pencil, Eye, Printer, FileSpreadsheet, Globe, Smartphone,
+  Sparkles, History, Ban, Percent, FileWarning, Timer, Save, User,
+  PlaySquare, ListChecks, HelpCircle, FileQuestion, GraduationCap as GradIcon,
+  Wallet, Layers, LineChart, FileBarChart, ArrowDownRight, TrendingDown,
+  Award, ShieldCheck, Lock, UploadCloud, MonitorPlay,
+  // Added missing Video icon
+  Video,
+  Clock, Megaphone, Database, Send, Image as ImageIcon, BarChart3, Pin, FileDown, 
+  MessageCircle, Cake, Info, Bus, Navigation, Fuel, Radio, LocateFixed, Utensils, Bed, Package, Barcode, Library, Bookmark,
+  Fingerprint, Terminal, RefreshCcw, ShieldAlert, Palette, AppWindow, GitBranch, KeyRound, Image as UserCircle
 } from '../components/Icons';
 import { useNavigation } from '../contexts/NavigationContext';
+import { 
+  fetchEnquiries, fetchStudents, registerStudent, 
+  fetchFeeRecords, recordFeePayment, markAttendance, 
+  fetchAttendanceByDate, fetchExamMarks, submitMarks,
+  fetchUserProfile, updateUserProfile
+} from '../services/formService';
 
-// --- Shared Components ---
+// --- SHARED COMPONENTS ---
 
-const DashboardSidebar: React.FC<{ 
-  title: string; 
-  role: string; 
-  menuItems: { id: string; label: string; icon: React.ReactNode }[]; 
+const Card = ({ children, title, action }: any) => (
+  <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden h-full flex flex-col transition-all hover:shadow-md">
+     {(title || action) && (
+       <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h3 className="font-black text-slate-900 uppercase tracking-widest text-[10px]">{title}</h3>
+          {action}
+       </div>
+     )}
+     <div className="p-6 flex-1">
+        {children}
+     </div>
+  </div>
+);
+
+const Badge = ({ children, variant = 'blue' }: any) => {
+  const colors: any = {
+    blue: 'bg-blue-100 text-blue-700',
+    green: 'bg-emerald-100 text-emerald-700',
+    red: 'bg-rose-100 text-rose-700',
+    orange: 'bg-orange-100 text-orange-700',
+    slate: 'bg-slate-100 text-slate-600',
+  };
+  return <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${colors[variant]}`}>{children}</span>;
+};
+
+// --- SETTINGS COMPONENT (REUSABLE) ---
+
+const ProfileSettings: React.FC<{ role: string }> = ({ role }) => {
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchUserProfile(role).then(data => {
+      setProfile(data);
+      setLoading(false);
+    });
+  }, [role]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    await updateUserProfile(role, profile);
+    setSaving(false);
+    alert('Profile Updated Successfully!');
+  };
+
+  if (loading) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto text-brand-600" /></div>;
+
+  const isOrg = role === 'org_admin';
+  const isVendor = role === 'vendor';
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+       <div className="flex justify-between items-end">
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Account Settings</h2>
+            <p className="text-slate-500 text-xs font-bold uppercase mt-1">Manage your identity & preferences</p>
+          </div>
+          <button 
+            onClick={handleSave} 
+            disabled={saving}
+            className="bg-brand-600 text-white px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl flex items-center transform active:scale-95 transition-all"
+          >
+            {saving ? <Loader2 size={16} className="animate-spin mr-2" /> : <Save size={16} className="mr-2" />} 
+            Save All Changes
+          </button>
+       </div>
+
+       <div className="grid lg:grid-cols-3 gap-8">
+          {/* Avatar Section */}
+          <div className="lg:col-span-1">
+             <Card title="Profile Image">
+                <div className="flex flex-col items-center py-4">
+                   <div className="relative group">
+                      <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 border-slate-50 shadow-xl">
+                         <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                      </div>
+                      <button className="absolute -bottom-2 -right-2 bg-brand-600 text-white p-2 rounded-xl shadow-lg border-4 border-white hover:bg-brand-700 transition-colors">
+                         <UploadCloud size={16} />
+                      </button>
+                   </div>
+                   <p className="mt-6 text-[10px] font-bold text-slate-400 uppercase text-center leading-relaxed">
+                      Recommended: 400x400px<br/>PNG or JPG (Max 2MB)
+                   </p>
+                </div>
+             </Card>
+          </div>
+
+          {/* Details Section */}
+          <div className="lg:col-span-2 space-y-6">
+             <Card title="Personal Details">
+                <div className="grid md:grid-cols-2 gap-6">
+                   <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase">Full Name</label>
+                      <input 
+                        type="text" 
+                        value={profile.full_name} 
+                        onChange={(e) => setProfile({...profile, full_name: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:border-brand-500 outline-none transition-all" 
+                      />
+                   </div>
+                   <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase">Email Address</label>
+                      <input 
+                        type="email" 
+                        value={profile.email} 
+                        readOnly
+                        className="w-full px-4 py-2.5 bg-slate-100 border border-slate-100 rounded-xl text-sm font-bold text-slate-400 outline-none cursor-not-allowed" 
+                      />
+                   </div>
+                   <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase">Mobile Number</label>
+                      <input 
+                        type="tel" 
+                        value={profile.phone} 
+                        onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:border-brand-500 outline-none transition-all" 
+                      />
+                   </div>
+                   <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase">Designation</label>
+                      <input 
+                        type="text" 
+                        value={profile.designation || 'Principal'} 
+                        onChange={(e) => setProfile({...profile, designation: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:border-brand-500 outline-none transition-all" 
+                      />
+                   </div>
+                </div>
+             </Card>
+
+             {(isOrg || isVendor) && (
+               <Card title={isOrg ? "Institutional Details" : "Business Details"}>
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                       <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase">{isOrg ? 'School/College Name' : 'Company Name'}</label>
+                          <input 
+                            type="text" 
+                            value={profile.institution_name} 
+                            onChange={(e) => setProfile({...profile, institution_name: e.target.value})}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:border-brand-500 outline-none transition-all" 
+                          />
+                       </div>
+                       <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase">GST Registration</label>
+                          <input 
+                            type="text" 
+                            value={profile.gst} 
+                            onChange={(e) => setProfile({...profile, gst: e.target.value})}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:border-brand-500 outline-none transition-all uppercase" 
+                          />
+                       </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                       <label className="text-[9px] font-black text-slate-400 uppercase">Registered Address</label>
+                       <textarea 
+                         rows={3}
+                         value={profile.address}
+                         onChange={(e) => setProfile({...profile, address: e.target.value})}
+                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:border-brand-500 outline-none transition-all"
+                       />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                       <div className="space-y-4">
+                          <label className="text-[9px] font-black text-slate-400 uppercase">Institutional Logo</label>
+                          <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-4 flex items-center justify-between group hover:border-brand-500 transition-colors">
+                             <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                <School size={20} className="text-slate-300" />
+                             </div>
+                             <button className="text-[10px] font-black text-brand-600 uppercase flex items-center px-4">
+                                <UploadCloud size={14} className="mr-2" /> Replace
+                             </button>
+                          </div>
+                       </div>
+                       <div className="space-y-4">
+                          <label className="text-[9px] font-black text-slate-400 uppercase">Textual Branding</label>
+                          <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-4 flex items-center justify-between group hover:border-brand-500 transition-colors">
+                             <div className="h-8 w-24 bg-slate-200 rounded animate-pulse"></div>
+                             <button className="text-[10px] font-black text-brand-600 uppercase flex items-center px-4">
+                                <UploadCloud size={14} className="mr-2" /> Upload
+                             </button>
+                          </div>
+                       </div>
+                    </div>
+                  </div>
+               </Card>
+             )}
+
+             <Card title="Security & Access">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                   <div className="flex items-center gap-4">
+                      <div className="bg-orange-50 p-3 rounded-xl text-orange-600">
+                         <Lock size={20} />
+                      </div>
+                      <div>
+                         <p className="text-sm font-bold text-slate-900">Password Security</p>
+                         <p className="text-xs text-slate-500">Last changed 45 days ago</p>
+                      </div>
+                   </div>
+                   <button className="px-6 py-2 border-2 border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all">Update Credentials</button>
+                </div>
+             </Card>
+          </div>
+       </div>
+    </div>
+  );
+};
+
+// --- MODULE 1: RECEPTION (ENQUIRY CRM) ---
+
+const EnquiryModule: React.FC = () => {
+  const { navigate } = useNavigation();
+  const [enquiries, setEnquiries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEnquiries().then(data => {
+      setEnquiries(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleConvert = async (enquiry: any) => {
+    const confirm = window.confirm(`Convert ${enquiry.payload.name} to a student?`);
+    if (confirm) {
+      await registerStudent({
+        full_name: enquiry.payload.name,
+        class_name: enquiry.payload.applying_class,
+        section: 'A',
+        parent_name: enquiry.payload.father,
+        phone: enquiry.payload.mobile,
+        email: enquiry.payload.email
+      });
+      alert('Admission Created Successfully!');
+      navigate('org-dashboard');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+       <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Lead Pipeline</h2>
+            <p className="text-slate-500 text-xs font-bold uppercase mt-1">Convert Enquiries to Admissions</p>
+          </div>
+          <button onClick={() => navigate('admission-enquiry')} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg flex items-center"><Plus size={14} className="mr-2" /> New Enquiry</button>
+       </div>
+
+       <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+          {loading ? (
+             <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto text-brand-600" /></div>
+          ) : enquiries.length === 0 ? (
+             <div className="p-20 text-center text-slate-400 italic">No enquiries logged yet.</div>
+          ) : (
+            <div className="overflow-x-auto">
+               <table className="w-full text-left">
+                  <thead className="bg-slate-50 border-b">
+                     <tr className="text-[10px] font-black uppercase text-slate-400">
+                        <th className="px-6 py-4">Name</th>
+                        <th className="px-6 py-4">Interested Class</th>
+                        <th className="px-6 py-4">Date</th>
+                        <th className="px-6 py-4 text-right">Action</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                     {enquiries.map((e: any) => (
+                        <tr key={e.id} className="text-sm hover:bg-slate-50 transition-colors">
+                           <td className="px-6 py-4 font-bold text-slate-900">{e.payload?.name || 'Walk-in'}</td>
+                           <td className="px-6 py-4 font-medium text-slate-600">{e.payload?.applying_class || 'Class 1'}</td>
+                           <td className="px-6 py-4 text-xs text-slate-400">{new Date(e.created_at).toLocaleDateString()}</td>
+                           <td className="px-6 py-4 text-right">
+                              <button onClick={() => handleConvert(e)} className="bg-brand-50 text-brand-700 px-4 py-1.5 rounded-lg font-black text-[10px] uppercase hover:bg-brand-600 hover:text-white transition-all">Convert</button>
+                           </td>
+                        </tr>
+                     ))}
+                  </tbody>
+               </table>
+            </div>
+          )}
+       </div>
+    </div>
+  );
+};
+
+// --- MODULE 2: ATTENDANCE (BULK MARKING) ---
+
+const AttendanceWorkspace: React.FC = () => {
+  const [students, setStudents] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchStudents().then(data => {
+      setStudents(data);
+      const init: any = {};
+      data.forEach((s: any) => init[s.student_id] = 'Present');
+      setAttendance(init);
+    });
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const date = new Date().toISOString().split('T')[0];
+    const records = Object.entries(attendance).map(([sid, status]) => ({ student_id: sid, status, date }));
+    await markAttendance(records);
+    setSaving(false);
+    alert('Attendance Saved for Today!');
+  };
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+       <div className="flex justify-between items-end">
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Bulk Attendance Marking</h2>
+            <p className="text-slate-500 text-xs font-bold uppercase mt-1">Class 10A • {new Date().toDateString()}</p>
+          </div>
+          <button 
+            disabled={saving} 
+            onClick={handleSave} 
+            className="bg-brand-600 text-white px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl flex items-center"
+          >
+            {saving ? <Loader2 size={14} className="animate-spin mr-2" /> : <Save size={14} className="mr-2" />} 
+            Finalize Roll Call
+          </button>
+       </div>
+
+       <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+          <table className="w-full text-left">
+             <thead className="bg-slate-900 text-[9px] font-black uppercase text-slate-400">
+                <tr>
+                   <th className="px-6 py-4">ID</th>
+                   <th className="px-6 py-4">Student Name</th>
+                   <th className="px-6 py-4 text-center">Present</th>
+                   <th className="px-6 py-4 text-center">Absent</th>
+                   <th className="px-6 py-4 text-center">Late</th>
+                </tr>
+             </thead>
+             <tbody className="divide-y divide-slate-100">
+                {students.map((s) => (
+                  <tr key={s.student_id} className="text-sm hover:bg-slate-50 transition-colors">
+                     <td className="px-6 py-4 font-mono text-[10px] text-slate-400 font-bold">{s.student_id}</td>
+                     <td className="px-6 py-4 font-black text-slate-800">{s.full_name}</td>
+                     <td className="px-6 py-4 text-center">
+                        <input type="radio" name={`att_${s.id}`} checked={attendance[s.student_id] === 'Present'} onChange={() => setAttendance({...attendance, [s.student_id]: 'Present'})} className="w-4 h-4 accent-emerald-500" />
+                     </td>
+                     <td className="px-6 py-4 text-center">
+                        <input type="radio" name={`att_${s.id}`} checked={attendance[s.student_id] === 'Absent'} onChange={() => setAttendance({...attendance, [s.student_id]: 'Absent'})} className="w-4 h-4 accent-rose-500" />
+                     </td>
+                     <td className="px-6 py-4 text-center">
+                        <input type="radio" name={`att_${s.id}`} checked={attendance[s.student_id] === 'Late'} onChange={() => setAttendance({...attendance, [s.student_id]: 'Late'})} className="w-4 h-4 accent-amber-500" />
+                     </td>
+                  </tr>
+                ))}
+             </tbody>
+          </table>
+       </div>
+    </div>
+  );
+};
+
+// --- MODULE 3: FINANCE (FEE COLLECTION) ---
+
+const FinanceWorkspace: React.FC = () => {
+  const [students, setStudents] = useState<any[]>([]);
+  const [feeRecords, setFeeRecords] = useState<any[]>([]);
+  const [search, setSearch] = useState('');
+  const [paying, setPaying] = useState<string | null>(null);
+
+  useEffect(() => {
+    Promise.all([fetchStudents(), fetchFeeRecords()]).then(([s, f]) => {
+      setStudents(s);
+      setFeeRecords(f);
+    });
+  }, []);
+
+  const handlePay = async (sid: string) => {
+    setPaying(sid);
+    await recordFeePayment(sid, 15000);
+    const updated = await fetchFeeRecords();
+    setFeeRecords(updated);
+    setPaying(null);
+    alert('Payment Successful! E-Receipt Sent.');
+  };
+
+  const filtered = students.filter(s => s.full_name.toLowerCase().includes(search.toLowerCase()) || s.student_id.includes(search));
+
+  return (
+    <div className="space-y-6">
+       <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Cashier Console</h2>
+            <p className="text-slate-500 text-xs font-bold uppercase mt-1">Institutional Fee Collection Ledger</p>
+          </div>
+          <div className="flex gap-2">
+            <button className="bg-white border px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest"><Printer size={14} className="mr-2 inline" /> Print Day Book</button>
+            <button className="bg-brand-600 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand-500/30">Bulk Billing</button>
+          </div>
+       </div>
+
+       <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-6 border-b bg-slate-50/50">
+             <div className="relative">
+                <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Scan Barcode or Search Student Name / ID..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white border border-slate-200 outline-none focus:ring-2 focus:ring-brand-500/20 shadow-sm"
+                />
+             </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+             <table className="w-full text-left">
+                <thead className="bg-slate-50 text-[9px] font-black uppercase text-slate-400 border-b">
+                   <tr>
+                      <th className="px-6 py-4">Student</th>
+                      <th className="px-6 py-4">Class/Section</th>
+                      <th className="px-6 py-4">Outstanding</th>
+                      <th className="px-6 py-4 text-center">Status</th>
+                      <th className="px-6 py-4 text-right">Action</th>
+                   </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                   {filtered.map(s => {
+                      const record = feeRecords.find(f => f.student_id === s.student_id);
+                      const isPaid = record?.status === 'Paid';
+                      return (
+                        <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
+                           <td className="px-6 py-4">
+                              <div className="font-black text-slate-900">{s.full_name}</div>
+                              <div className="text-[10px] font-mono text-slate-400">{s.student_id}</div>
+                           </td>
+                           <td className="px-6 py-4 font-bold text-slate-600">{s.class_name} - {s.section}</td>
+                           <td className="px-6 py-4 font-black text-slate-900">₹ {isPaid ? '0' : '15,000'}</td>
+                           <td className="px-6 py-4 text-center">
+                              <Badge variant={isPaid ? 'green' : 'orange'}>{record?.status || 'Pending'}</Badge>
+                           </td>
+                           <td className="px-6 py-4 text-right">
+                              {isPaid ? (
+                                <button className="p-2 text-slate-400 hover:text-brand-600 transition-colors"><FileText size={18}/></button>
+                              ) : (
+                                <button 
+                                  disabled={paying === s.student_id}
+                                  onClick={() => handlePay(s.student_id)} 
+                                  className="bg-slate-900 text-white px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-brand-600 transition-all shadow-md"
+                                >
+                                   {paying === s.student_id ? <Loader2 size={12} className="animate-spin" /> : 'Pay Now'}
+                                </button>
+                              )}
+                           </td>
+                        </tr>
+                      )
+                   })}
+                </tbody>
+             </table>
+          </div>
+       </div>
+    </div>
+  );
+};
+
+// --- MODULE 4: EXAMS & RESULTS ---
+
+const ExamsWorkspace: React.FC = () => {
+  const [students, setStudents] = useState<any[]>([]);
+  const [marks, setMarks] = useState<any[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState('Mathematics');
+
+  useEffect(() => {
+    Promise.all([fetchStudents(), fetchExamMarks()]).then(([s, m]) => {
+      setStudents(s);
+      setMarks(m);
+    });
+  }, []);
+
+  const handleMarkEntry = async (sid: string, score: string) => {
+    const val = parseInt(score);
+    if (isNaN(val)) return;
+    await submitMarks({ student_id: sid, subject: selectedSubject, max_marks: 100, obtained_marks: val, grade: val > 80 ? 'A+' : val > 60 ? 'B' : 'C' });
+    fetchExamMarks().then(setMarks);
+  };
+
+  return (
+    <div className="space-y-6">
+       <div className="flex justify-between items-end">
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Examinations Hub</h2>
+            <p className="text-slate-500 text-xs font-bold uppercase mt-1">Result Processing & Gradecard Generation</p>
+          </div>
+          <button className="bg-orange-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl flex items-center">
+             <Award className="mr-2" size={16} /> Batch Print Results
+          </button>
+       </div>
+
+       <div className="grid lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-1 space-y-4">
+             <Card title="Configuration">
+                <div className="space-y-4">
+                   <div>
+                      <label className="text-[9px] font-black text-slate-400 uppercase">Subject</label>
+                      <select 
+                        value={selectedSubject} 
+                        onChange={(e) => setSelectedSubject(e.target.value)}
+                        className="w-full mt-1 px-3 py-2 border rounded-xl text-sm font-bold bg-slate-50 outline-none focus:ring-1 focus:ring-brand-500"
+                      >
+                         {['Mathematics', 'Physics', 'Chemistry', 'English', 'History'].map(s => <option key={s}>{s}</option>)}
+                      </select>
+                   </div>
+                   <div>
+                      <label className="text-[9px] font-black text-slate-400 uppercase">Exam Type</label>
+                      <select className="w-full mt-1 px-3 py-2 border rounded-xl text-sm font-bold bg-slate-50 outline-none">
+                         <option>Mid-Term 2024</option>
+                         <option>Final 2024</option>
+                      </select>
+                   </div>
+                </div>
+             </Card>
+          </div>
+
+          <div className="lg:col-span-3 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+             <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
+                <h3 className="text-xs font-black text-slate-700 uppercase tracking-widest">{selectedSubject} Marksheet</h3>
+                <Filter size={14} className="text-slate-400" />
+             </div>
+             <table className="w-full text-left">
+                <thead className="bg-white text-[9px] font-black uppercase text-slate-400 border-b">
+                   <tr>
+                      <th className="px-6 py-4">Student</th>
+                      <th className="px-6 py-4">Max Marks</th>
+                      <th className="px-6 py-4">Obtained</th>
+                      <th className="px-6 py-4 text-right">Current Grade</th>
+                   </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                   {students.map(s => {
+                      const m = marks.find(mark => mark.student_id === s.student_id && mark.subject === selectedSubject);
+                      return (
+                        <tr key={s.id} className="text-sm">
+                           <td className="px-6 py-4 font-bold text-slate-800">{s.full_name}</td>
+                           <td className="px-6 py-4 text-slate-400">100</td>
+                           <td className="px-6 py-4">
+                              <input 
+                                type="number" 
+                                defaultValue={m?.obtained_marks || ''} 
+                                onBlur={(e) => handleMarkEntry(s.student_id, e.target.value)}
+                                className="w-20 px-3 py-1.5 bg-slate-50 border rounded-lg text-sm font-black focus:ring-1 focus:ring-brand-500 outline-none"
+                              />
+                           </td>
+                           <td className="px-6 py-4 text-right">
+                              <Badge variant={m?.grade?.startsWith('A') ? 'green' : m?.grade ? 'blue' : 'slate'}>{m?.grade || '--'}</Badge>
+                           </td>
+                        </tr>
+                      )
+                   })}
+                </tbody>
+             </table>
+          </div>
+       </div>
+    </div>
+  );
+};
+
+// --- ORG DASHBOARD OVERVIEW ---
+
+const OrgOverview: React.FC<{setActiveTab: any}> = ({setActiveTab}) => {
+  const [counts, setCounts] = useState({ s: 0, e: 0, fees: 0 });
+  
+  useEffect(() => {
+    Promise.all([fetchStudents(), fetchEnquiries(), fetchFeeRecords()]).then(([s, e, f]) => {
+      setCounts({ 
+        s: s.length, 
+        e: e.length, 
+        fees: f.filter((fee: any) => fee.status === 'Pending').length * 15000 
+      });
+    });
+  }, []);
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-700">
+       <div className="flex flex-col md:flex-row justify-between items-end gap-4">
+          <div>
+             <h2 className="text-3xl font-black text-slate-900 tracking-tight">Namaste, Principal Singh</h2>
+             <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">Institutional Health Index: <span className="text-emerald-600">Optimal (9.4/10)</span></p>
+          </div>
+          <div className="flex gap-2">
+             <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-brand-600 transition-colors cursor-pointer shadow-sm"><Calendar size={20}/></div>
+             <div className="bg-white p-2.5 rounded-xl border border-slate-200 text-slate-400 relative hover:text-brand-600 transition-colors cursor-pointer shadow-sm">
+                <Bell size={20}/>
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+             </div>
+          </div>
+       </div>
+
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm group hover:shadow-xl transition-all cursor-pointer" onClick={() => setActiveTab('students')}>
+             <div className="flex justify-between items-start mb-4">
+                <div className="bg-brand-50 p-3 rounded-2xl text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-colors shadow-inner"><Users size={24} /></div>
+                <span className="text-[9px] font-black text-green-600 uppercase bg-green-50 px-2 py-0.5 rounded">+12 This Month</span>
+             </div>
+             <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest">Active Enrollment</p>
+             <h3 className="text-4xl font-black text-slate-900 mt-1">{counts.s}</h3>
+          </div>
+          
+          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm group hover:shadow-xl transition-all cursor-pointer" onClick={() => setActiveTab('admission-enquiry')}>
+             <div className="flex justify-between items-start mb-4">
+                <div className="bg-blue-50 p-3 rounded-2xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-inner"><MessageSquare size={24} /></div>
+                <span className="text-[9px] font-black text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded">Real-time Feed</span>
+             </div>
+             <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest">Enquiry Pool</p>
+             <h3 className="text-4xl font-black text-slate-900 mt-1">{counts.e}</h3>
+          </div>
+
+          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm group hover:shadow-xl transition-all cursor-pointer" onClick={() => setActiveTab('fee-center')}>
+             <div className="flex justify-between items-start mb-4">
+                <div className="bg-orange-50 p-3 rounded-2xl text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors shadow-inner"><DollarSign size={24} /></div>
+                <span className="text-[9px] font-black text-rose-600 uppercase bg-rose-50 px-2 py-0.5 rounded">Pending Collection</span>
+             </div>
+             <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest">Revenue at Risk</p>
+             <h3 className="text-4xl font-black text-slate-900 mt-1">₹ {counts.fees.toLocaleString()}</h3>
+          </div>
+
+          <div className="bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform"><Database size={100} /></div>
+             <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest relative z-10">Platform Status</p>
+             <h3 className="text-3xl font-black text-white mt-1 relative z-10">ACTIVE</h3>
+             <span className="text-brand-400 text-[10px] font-black uppercase tracking-wider block mt-4 relative z-10">99.99% Uptime SLA</span>
+          </div>
+       </div>
+
+       <div className="grid md:grid-cols-4 gap-6 pb-12">
+          {[
+            { id: 'attendance', label: 'Roll Call', icon: <CheckCircle2 />, color: 'brand' },
+            { id: 'fee-center', label: 'Cashier', icon: <CreditCard />, color: 'blue' },
+            { id: 'exams', label: 'Exams', icon: <Award />, color: 'emerald' },
+            { id: 'students', label: 'Directory', icon: <Users />, color: 'purple' },
+          ].map(btn => (
+            <button key={btn.id} onClick={() => setActiveTab(btn.id)} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all text-center flex flex-col items-center group transform hover:-translate-y-1">
+               <div className={`w-14 h-14 bg-${btn.color}-50 rounded-3xl flex items-center justify-center text-${btn.color}-600 mb-6 group-hover:scale-110 group-hover:bg-${btn.color}-600 group-hover:text-white transition-all shadow-inner`}>
+                  {React.cloneElement(btn.icon as any, { size: 24 })}
+               </div>
+               <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">{btn.label}</span>
+            </button>
+          ))}
+       </div>
+    </div>
+  );
+};
+
+// --- CORE DASHBOARD WRAPPERS ---
+
+export const OrgDashboard: React.FC = () => {
+  const { navigate } = useNavigation();
+  const [activeTab, setActiveTab] = React.useState('overview');
+  
+  const menuItems = [
+    { id: 'overview', label: 'Insights', icon: <LayoutDashboard size={18} /> },
+    { 
+      id: 'reception', label: 'Front Desk', icon: <MessageSquare size={18} />,
+      subItems: [{ id: 'admission-enquiry', label: 'Admission CRM' }, { id: 'visitor-log', label: 'Visitor Book' }]
+    },
+    { 
+      id: 'academics', label: 'L&D Center', icon: <BookOpen size={18} />,
+      subItems: [{ id: 'attendance', label: 'Attendance' }, { id: 'exams', label: 'Examinations' }, { id: 'timetable', label: 'Schedule' }]
+    },
+    { 
+      id: 'financials', label: 'Accounts', icon: <DollarSign size={18} />,
+      subItems: [{ id: 'fee-center', label: 'Fee Center' }, { id: 'expense', label: 'Expenses' }]
+    },
+    { id: 'students', label: 'SIS Records', icon: <Users size={18} /> },
+    { id: 'settings', label: 'Config', icon: <Settings size={18} /> }
+  ];
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview': return <OrgOverview setActiveTab={setActiveTab} />;
+      case 'admission-enquiry': return <EnquiryModule />;
+      case 'attendance': return <AttendanceWorkspace />;
+      case 'fee-center': return <FinanceWorkspace />;
+      case 'exams': return <ExamsWorkspace />;
+      case 'settings': return <ProfileSettings role="org_admin" />;
+      case 'students': return (
+        <div className="space-y-6">
+           <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Student Information System</h2>
+              <button onClick={() => navigate('create-admission')} className="bg-brand-600 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl flex items-center hover:bg-brand-700 transition-all"><UserPlus size={16} className="mr-2"/> New Student</button>
+           </div>
+           <SISDirectory />
+        </div>
+      );
+      default: return (
+        <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[3rem] border border-slate-100 shadow-inner">
+           <div className="bg-slate-100 p-8 rounded-full mb-8"><Settings size={40} className="text-slate-300 animate-spin-slow" /></div>
+           <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">{activeTab} Work In Progress</h2>
+           <p className="text-slate-400 mt-2 font-bold max-w-xs text-center">We are optimizing the database for this module. Please check back shortly.</p>
+        </div>
+      );
+    }
+  };
+
+  return (
+    <DashboardLayout title="Modern Academy Global" role="Institutional ERP Admin" menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab}>
+       {renderContent()}
+    </DashboardLayout>
+  );
+};
+
+export const TeacherDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const menuItems = [
+    { id: 'overview', label: 'Planner', icon: <LayoutDashboard size={18} /> },
+    { id: 'classes', label: 'Live Sessions', icon: <Video size={18} /> },
+    { id: 'students', label: 'My Batches', icon: <Users size={18} /> },
+    { id: 'earnings', label: 'Payouts', icon: <DollarSign size={18} /> },
+    { id: 'settings', label: 'Profile', icon: <Settings size={18} /> }
+  ];
+
+  return (
+    <DashboardLayout title="Faculty Hub" role="Certified Educator" menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab}>
+       {activeTab === 'settings' ? <ProfileSettings role="teacher" /> : (
+         <div className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest">Faculty Management Console Ready</div>
+       )}
+    </DashboardLayout>
+  );
+};
+
+export const StudentDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const menuItems = [
+    { id: 'overview', label: 'My Learning', icon: <BookOpen size={18} /> },
+    { id: 'exams', label: 'Results', icon: <Award size={18} /> },
+    { id: 'fee-payment', label: 'Pay Dues', icon: <CreditCard size={18} /> },
+    { id: 'settings', label: 'Profile', icon: <Settings size={18} /> }
+  ];
+
+  return (
+    <DashboardLayout title="Student Workspace" role="Class 10A" menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab}>
+       {activeTab === 'settings' ? <ProfileSettings role="student" /> : (
+         <div className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest">Student Portal Active</div>
+       )}
+    </DashboardLayout>
+  );
+};
+
+export const ParentDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const menuItems = [
+    { id: 'overview', label: 'Wards', icon: <Baby size={18} /> },
+    { id: 'fees', label: 'Ledger', icon: <DollarSign size={18} /> },
+    { id: 'transport', label: 'Fleet Sync', icon: <Bus size={18} /> },
+    { id: 'settings', label: 'Account', icon: <Settings size={18} /> }
+  ];
+
+  return (
+    <DashboardLayout title="Parental Control" role="Primary Guardian" menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab}>
+       {activeTab === 'settings' ? <ProfileSettings role="parent" /> : (
+         <div className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest">Guardian Dashboard Active</div>
+       )}
+    </DashboardLayout>
+  );
+};
+
+const SISDirectory = () => {
+  const [students, setStudents] = useState<any[]>([]);
+  useEffect(() => { fetchStudents().then(setStudents); }, []);
+  return (
+    <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
+       <div className="p-4 border-b bg-slate-50/50 flex justify-between items-center">
+          <div className="relative w-64">
+             <Search className="absolute left-3 top-2.5 text-slate-400" size={14} />
+             <input placeholder="Fast Search..." className="w-full pl-9 pr-4 py-1.5 text-xs rounded-lg border outline-none focus:border-brand-500" />
+          </div>
+          <button className="p-2 text-slate-400 hover:text-brand-600 transition-colors"><Download size={18}/></button>
+       </div>
+       <table className="w-full text-left">
+          <thead className="bg-white text-[9px] font-black uppercase text-slate-400 border-b">
+             <tr>
+                <th className="px-6 py-4">Student ID</th>
+                <th className="px-6 py-4">Name</th>
+                <th className="px-6 py-4">Parent</th>
+                <th className="px-6 py-4">Contact</th>
+                <th className="px-6 py-4 text-right">Status</th>
+             </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-sm">
+             {students.map(s => (
+                <tr key={s.student_id} className="hover:bg-slate-50/50 transition-colors">
+                   <td className="px-6 py-4 font-mono font-bold text-brand-600 text-xs">{s.student_id}</td>
+                   <td className="px-6 py-4 font-black text-slate-900">{s.full_name}</td>
+                   <td className="px-6 py-4 text-slate-500">{s.parent_name}</td>
+                   <td className="px-6 py-4 font-medium text-slate-600">{s.phone}</td>
+                   <td className="px-6 py-4 text-right"><Badge variant="green">{s.status}</Badge></td>
+                </tr>
+             ))}
+          </tbody>
+       </table>
+    </div>
+  );
+};
+
+// --- BASE COMPONENTS ---
+
+export const DashboardSidebar: React.FC<{
+  title: string;
+  role: string;
+  menuItems: any[];
   activeTab: string;
-  setActiveTab: (id: any) => void;
+  setActiveTab: (id: string) => void;
 }> = ({ title, role, menuItems, activeTab, setActiveTab }) => {
   const { navigate } = useNavigation();
+  const [openMenus, setOpenMenus] = useState<string[]>([]);
+
   return (
     <aside className="w-64 bg-slate-900 text-white hidden lg:flex flex-col fixed h-full top-0 pt-20 z-10 left-0 border-r border-slate-800">
-      <div className="px-6 py-6 border-b border-slate-800">
-         <h2 className="text-lg font-bold">{title}</h2>
-         <p className="text-xs text-slate-400 uppercase tracking-wider mt-1">{role}</p>
+      <div className="px-6 py-8 border-b border-slate-800 flex items-center gap-3">
+        <div className="w-10 h-10 bg-brand-600 rounded-2xl flex items-center justify-center shadow-lg"><School size={20}/></div>
+        <div>
+          <h2 className="text-sm font-black uppercase tracking-tight truncate w-32">{title}</h2>
+          <p className="text-[8px] text-slate-500 mt-0.5 uppercase tracking-widest font-black">{role}</p>
+        </div>
       </div>
-      <nav className="flex-1 p-4 space-y-2">
-        {menuItems.map(item => (
-          <button 
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeTab === item.id ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-          >
-            <span className="mr-3">{item.icon}</span>
-            {item.label}
-          </button>
+      <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar pb-24">
+        {menuItems.map((item) => (
+          <div key={item.id}>
+            <button 
+              onClick={() => {
+                if (item.subItems) {
+                  setOpenMenus(prev => prev.includes(item.id) ? prev.filter(i => i !== item.id) : [...prev, item.id]);
+                } else {
+                  setActiveTab(item.id);
+                }
+              }}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
+                activeTab === item.id || (item.subItems && item.subItems.some((s: any) => s.id === activeTab))
+                ? 'bg-brand-600 text-white shadow-xl shadow-brand-500/10' 
+                : 'text-slate-500 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center">
+                <span className={`mr-3 transition-colors ${activeTab === item.id ? 'text-white' : 'text-slate-600 group-hover:text-white'}`}>{item.icon}</span>
+                <span className="text-xs font-black uppercase tracking-widest">{item.label}</span>
+              </div>
+              {item.subItems && (
+                <Plus size={10} className={`transition-transform duration-300 ${openMenus.includes(item.id) ? 'rotate-45' : ''}`} />
+              )}
+            </button>
+            {item.subItems && openMenus.includes(item.id) && (
+              <div className="ml-9 mt-1 space-y-1 border-l border-slate-800 pl-4 animate-in slide-in-from-left-2 duration-200">
+                {item.subItems.map((sub: any) => (
+                  <button 
+                    key={sub.id}
+                    onClick={() => setActiveTab(sub.id)}
+                    className={`w-full text-left px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                      activeTab === sub.id ? 'text-brand-400' : 'text-slate-600 hover:text-slate-300'
+                    }`}
+                  >
+                    {sub.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         ))}
       </nav>
-      <div className="p-4 border-t border-slate-800 pb-24">
-        <button onClick={() => navigate('login')} className="w-full flex items-center px-4 py-3 text-red-400 hover:bg-slate-800 rounded-xl transition-all">
-          <LogOut size={20} className="mr-3" />
-          Log Out
+      <div className="p-4 border-t border-slate-800 bg-slate-900 absolute bottom-0 w-full">
+        <button onClick={() => navigate('home')} className="w-full flex items-center px-4 py-3 text-rose-500 hover:bg-rose-500/10 rounded-2xl transition-all group">
+          <LogOut size={18} className="mr-3 group-hover:rotate-12 transition-transform" />
+          <span className="text-xs font-black uppercase tracking-widest">Terminate Session</span>
         </button>
       </div>
     </aside>
   );
 };
 
-const DashboardLayout: React.FC<{ 
-  title: string; 
-  role: string; 
+export const DashboardLayout: React.FC<{
+  title: string;
+  role: string;
   menuItems: any[];
-  children: React.ReactNode;
   activeTab: string;
-  setActiveTab: (id: any) => void;
-}> = ({ title, role, menuItems, children, activeTab, setActiveTab }) => {
-  const { navigate } = useNavigation();
+  setActiveTab: (id: string) => void;
+  children: React.ReactNode;
+}> = ({ title, role, menuItems, activeTab, setActiveTab, children }) => {
   return (
-    <div className="pt-20 bg-slate-50 min-h-screen flex">
+    <div className="pt-20 bg-slate-50 min-h-screen flex font-sans">
       <DashboardSidebar 
         title={title} 
         role={role} 
@@ -64,538 +925,11 @@ const DashboardLayout: React.FC<{
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
       />
-      <main className="flex-1 lg:ml-64 p-4 lg:p-8 pt-24 lg:pt-8">
-        <div className="lg:hidden mb-6 flex justify-between items-center">
-           <div>
-             <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
-             <p className="text-xs text-slate-500">{role}</p>
-           </div>
-           <button onClick={() => navigate('login')} className="text-red-500 bg-red-50 p-2 rounded-lg"><LogOut size={24} /></button>
-        </div>
+      <main className="flex-1 lg:ml-64 p-4 lg:p-8 pt-24 lg:pt-8 overflow-x-hidden">
         {children}
       </main>
     </div>
   );
 };
 
-
-// --- 1. Super Admin Dashboard ---
-
-export const SuperAdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState('overview');
-  
-  const menuItems = [
-    { id: 'overview', label: 'Platform Overview', icon: <Activity size={20} /> },
-    { id: 'schools', label: 'Institutions', icon: <School size={20} /> },
-    { id: 'revenue', label: 'Revenue', icon: <CreditCard size={20} /> },
-    { id: 'users', label: 'User Management', icon: <Users size={20} /> },
-    { id: 'settings', label: 'System Settings', icon: <Settings size={20} /> },
-  ];
-
-  return (
-    <DashboardLayout title="MasterRoll Admin" role="Super Admin" menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab}>
-       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-             <div className="flex justify-between items-start">
-                <div>
-                   <p className="text-slate-500 text-sm font-medium">Total Institutions</p>
-                   <h3 className="text-3xl font-bold text-slate-900 mt-2">542</h3>
-                </div>
-                <div className="bg-blue-100 p-2 rounded-lg text-blue-600"><School size={20} /></div>
-             </div>
-             <span className="text-green-600 text-xs font-bold flex items-center mt-2"><TrendingUp size={14} className="mr-1"/> +12 this month</span>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-             <div className="flex justify-between items-start">
-                <div>
-                   <p className="text-slate-500 text-sm font-medium">Active Students</p>
-                   <h3 className="text-3xl font-bold text-slate-900 mt-2">2.4M</h3>
-                </div>
-                <div className="bg-orange-100 p-2 rounded-lg text-orange-600"><Users size={20} /></div>
-             </div>
-             <span className="text-green-600 text-xs font-bold flex items-center mt-2"><TrendingUp size={14} className="mr-1"/> +5% growth</span>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-             <div className="flex justify-between items-start">
-                <div>
-                   <p className="text-slate-500 text-sm font-medium">Monthly Revenue</p>
-                   <h3 className="text-3xl font-bold text-slate-900 mt-2">₹ 4.2 Cr</h3>
-                </div>
-                <div className="bg-green-100 p-2 rounded-lg text-green-600"><CreditCard size={20} /></div>
-             </div>
-             <span className="text-green-600 text-xs font-bold flex items-center mt-2"><TrendingUp size={14} className="mr-1"/> +18% vs last month</span>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-             <div className="flex justify-between items-start">
-                <div>
-                   <p className="text-slate-500 text-sm font-medium">System Health</p>
-                   <h3 className="text-3xl font-bold text-green-600 mt-2">99.9%</h3>
-                </div>
-                <div className="bg-purple-100 p-2 rounded-lg text-purple-600"><Activity size={20} /></div>
-             </div>
-             <span className="text-slate-400 text-xs font-bold mt-2 block">Server Load: 42%</span>
-          </div>
-       </div>
-
-       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
-          <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-             <h3 className="font-bold text-lg text-slate-900">Recent Institute Signups</h3>
-             <button className="text-blue-600 text-sm font-bold">View All</button>
-          </div>
-          <div className="overflow-x-auto">
-             <table className="w-full text-left">
-                <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
-                   <tr>
-                      <th className="px-6 py-4 font-semibold">Institute Name</th>
-                      <th className="px-6 py-4 font-semibold">City</th>
-                      <th className="px-6 py-4 font-semibold">Plan</th>
-                      <th className="px-6 py-4 font-semibold">Status</th>
-                      <th className="px-6 py-4 font-semibold">Date</th>
-                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                   {[
-                      { name: "St. Xavier's High School", city: "Mumbai", plan: "Enterprise", status: "Active", date: "Oct 24, 2024" },
-                      { name: "Green Valley Public School", city: "Bangalore", plan: "Pro", status: "Pending", date: "Oct 23, 2024" },
-                      { name: "Delhi Heritage Academy", city: "New Delhi", plan: "Pro", status: "Active", date: "Oct 22, 2024" },
-                      { name: "Little Stars Kindergarten", city: "Pune", plan: "Basic", status: "Active", date: "Oct 21, 2024" },
-                   ].map((row, i) => (
-                      <tr key={i} className="hover:bg-slate-50">
-                         <td className="px-6 py-4 font-bold text-slate-900">{row.name}</td>
-                         <td className="px-6 py-4 text-slate-600">{row.city}</td>
-                         <td className="px-6 py-4 text-slate-600"><span className="bg-slate-100 px-2 py-1 rounded text-xs font-bold">{row.plan}</span></td>
-                         <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${row.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                               {row.status}
-                            </span>
-                         </td>
-                         <td className="px-6 py-4 text-slate-500 text-sm">{row.date}</td>
-                      </tr>
-                   ))}
-                </tbody>
-             </table>
-          </div>
-       </div>
-    </DashboardLayout>
-  );
-};
-
-// --- 2. Organization Admin Dashboard ---
-
-export const OrgDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState('overview');
-  
-  const menuItems = [
-    { id: 'overview', label: 'School Overview', icon: <LayoutDashboard size={20} /> },
-    { id: 'students', label: 'Students', icon: <Users size={20} /> },
-    { id: 'fees', label: 'Fee Collection', icon: <CreditCard size={20} /> },
-    { id: 'staff', label: 'Staff HR', icon: <UserCheck size={20} /> },
-    { id: 'academics', label: 'Academics', icon: <BookOpen size={20} /> },
-  ];
-
-  return (
-    <DashboardLayout title="Modern Academy" role="Principal Dashboard" menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab}>
-       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-             <div className="flex justify-between items-start">
-               <div>
-                  <p className="text-slate-500 text-sm font-medium">Total Students</p>
-                  <h3 className="text-3xl font-bold text-slate-900 mt-1">1,250</h3>
-               </div>
-               <div className="p-3 bg-blue-100 text-blue-600 rounded-xl"><Users size={24} /></div>
-             </div>
-             <div className="w-full bg-slate-100 rounded-full h-1.5 mt-4">
-                <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: '85%' }}></div>
-             </div>
-             <p className="text-xs text-slate-400 mt-2">85% Capacity</p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-             <div className="flex justify-between items-start">
-               <div>
-                  <p className="text-slate-500 text-sm font-medium">Fees Collected (Oct)</p>
-                  <h3 className="text-3xl font-bold text-slate-900 mt-1">₹ 45.2 L</h3>
-               </div>
-               <div className="p-3 bg-green-100 text-green-600 rounded-xl"><CreditCard size={24} /></div>
-             </div>
-             <div className="w-full bg-slate-100 rounded-full h-1.5 mt-4">
-                <div className="bg-green-600 h-1.5 rounded-full" style={{ width: '62%' }}></div>
-             </div>
-             <p className="text-xs text-slate-400 mt-2">62% of monthly target</p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-             <div className="flex justify-between items-start">
-               <div>
-                  <p className="text-slate-500 text-sm font-medium">Staff Attendance</p>
-                  <h3 className="text-3xl font-bold text-slate-900 mt-1">84 / 90</h3>
-               </div>
-               <div className="p-3 bg-purple-100 text-purple-600 rounded-xl"><UserCheck size={24} /></div>
-             </div>
-             <div className="flex -space-x-2 mt-4">
-                {[1,2,3,4].map(i => <div key={i} className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-600">S{i}</div>)}
-                <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-[10px] text-slate-500 font-bold">+80</div>
-             </div>
-          </div>
-       </div>
-
-       <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-             <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-slate-900">Recent Fee Payments</h3>
-                <button className="text-xs font-bold text-blue-600">View Report</button>
-             </div>
-             <ul className="space-y-4">
-                {[
-                   { id: 1001, name: "Rahul Sharma", class: "10-A", amount: "12,500" },
-                   { id: 1002, name: "Priya Verma", class: "9-B", amount: "12,500" },
-                   { id: 1003, name: "Amit Singh", class: "12-Sci", amount: "18,000" },
-                   { id: 1004, name: "Sneha Gupta", class: "8-C", amount: "10,500" }
-                ].map((s, i) => (
-                  <li key={i} className="flex justify-between items-center border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                     <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold mr-3">{s.name.charAt(0)}</div>
-                        <div>
-                           <p className="text-sm font-bold text-slate-900">{s.name}</p>
-                           <p className="text-xs text-slate-500">Class {s.class} • ID: {s.id}</p>
-                        </div>
-                     </div>
-                     <span className="font-bold text-green-600">+ ₹ {s.amount}</span>
-                  </li>
-                ))}
-             </ul>
-          </div>
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-             <h3 className="font-bold text-slate-900 mb-6">Pending Tasks</h3>
-             <div className="space-y-4">
-                <div className="flex items-start p-3 bg-yellow-50 rounded-xl border border-yellow-100">
-                   <AlertCircle className="w-5 h-5 text-yellow-600 mr-3 mt-0.5" />
-                   <div>
-                      <p className="text-sm font-bold text-yellow-800">Approve Staff Leave</p>
-                      <p className="text-xs text-yellow-600 mt-1">3 pending requests from Science Dept.</p>
-                   </div>
-                   <button className="ml-auto text-xs bg-white border border-yellow-200 px-3 py-1 rounded font-bold text-yellow-700">View</button>
-                </div>
-                <div className="flex items-start p-3 bg-blue-50 rounded-xl border border-blue-100">
-                   <FileText className="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
-                   <div>
-                      <p className="text-sm font-bold text-blue-800">Admission Enquiries</p>
-                      <p className="text-xs text-blue-600 mt-1">12 new applications for next academic year.</p>
-                   </div>
-                   <button className="ml-auto text-xs bg-white border border-blue-200 px-3 py-1 rounded font-bold text-blue-700">Review</button>
-                </div>
-                <div className="flex items-start p-3 bg-red-50 rounded-xl border border-red-100">
-                   <CreditCard className="w-5 h-5 text-red-600 mr-3 mt-0.5" />
-                   <div>
-                      <p className="text-sm font-bold text-red-800">Fee Defaulters</p>
-                      <p className="text-xs text-red-600 mt-1">45 students have overdue fees > 30 days.</p>
-                   </div>
-                   <button className="ml-auto text-xs bg-white border border-red-200 px-3 py-1 rounded font-bold text-red-700">Alert</button>
-                </div>
-             </div>
-          </div>
-       </div>
-    </DashboardLayout>
-  );
-};
-
-// --- 3. Teacher Dashboard ---
-
-export const TeacherDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState('schedule');
-  
-  const menuItems = [
-    { id: 'schedule', label: 'My Schedule', icon: <Calendar size={20} /> },
-    { id: 'classes', label: 'My Classes', icon: <Users size={20} /> },
-    { id: 'attendance', label: 'Mark Attendance', icon: <UserCheck size={20} /> },
-    { id: 'lms', label: 'Course Content', icon: <BookOpen size={20} /> },
-    { id: 'grades', label: 'Grades & Reports', icon: <FileText size={20} /> },
-  ];
-
-  return (
-    <DashboardLayout title="Faculty Portal" role="Amit Verma (Physics)" menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab}>
-       <div className="flex justify-between items-center mb-8">
-          <div>
-             <h2 className="text-2xl font-bold text-slate-900">Good Morning, Amit</h2>
-             <p className="text-slate-600">You have 4 classes scheduled for today.</p>
-          </div>
-          <div className="text-right">
-             <p className="text-3xl font-bold text-slate-900">10:45 AM</p>
-             <p className="text-slate-500 text-sm">Wednesday, Oct 25</p>
-          </div>
-       </div>
-
-       <div className="grid lg:grid-cols-3 gap-8">
-          {/* Timeline */}
-          <div className="lg:col-span-2 space-y-6">
-             <h3 className="font-bold text-slate-900 text-lg">Today's Timeline</h3>
-             {[
-                { time: '09:00 AM', subject: 'Physics (Mechanics)', class: 'Class 10-A', status: 'Completed', color: 'green' },
-                { time: '10:30 AM', subject: 'Physics Lab', class: 'Class 12-Sci', status: 'In Progress', color: 'blue' },
-                { time: '01:00 PM', subject: 'Math Substitution', class: 'Class 8-B', status: 'Upcoming', color: 'orange' },
-                { time: '02:30 PM', subject: 'Remedial Class', class: 'Library', status: 'Upcoming', color: 'purple' },
-             ].map((cls, idx) => (
-                <div key={idx} className={`bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-brand-300 transition-colors relative overflow-hidden`}>
-                   <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-${cls.color}-500`}></div>
-                   <div className="flex items-center pl-4">
-                      <div className={`p-3 rounded-xl bg-${cls.color}-50 text-${cls.color}-600 mr-4`}>
-                         <Clock size={20} />
-                      </div>
-                      <div>
-                         <p className="font-bold text-slate-900">{cls.subject}</p>
-                         <p className="text-sm text-slate-500">{cls.time} • {cls.class}</p>
-                      </div>
-                   </div>
-                   {cls.status === 'In Progress' ? (
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-blue-500/30">
-                         Open Classroom
-                      </button>
-                   ) : (
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold bg-${cls.color}-100 text-${cls.color}-700`}>
-                         {cls.status}
-                      </span>
-                   )}
-                </div>
-             ))}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="space-y-6">
-             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-                <h3 className="font-bold text-slate-900 mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-2 gap-3">
-                   <button className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center text-center transition-colors">
-                      <UserCheck className="w-6 h-6 text-blue-600 mb-2" />
-                      <span className="text-xs font-bold text-slate-700">Attendance</span>
-                   </button>
-                   <button className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center text-center transition-colors">
-                      <FileText className="w-6 h-6 text-green-600 mb-2" />
-                      <span className="text-xs font-bold text-slate-700">Marks Entry</span>
-                   </button>
-                   <button className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center text-center transition-colors">
-                      <BookOpen className="w-6 h-6 text-purple-600 mb-2" />
-                      <span className="text-xs font-bold text-slate-700">Assignments</span>
-                   </button>
-                   <button className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center text-center transition-colors">
-                      <Calendar className="w-6 h-6 text-orange-600 mb-2" />
-                      <span className="text-xs font-bold text-slate-700">Apply Leave</span>
-                   </button>
-                </div>
-             </div>
-
-             <div className="bg-indigo-900 rounded-2xl p-6 text-white shadow-lg">
-                <h3 className="font-bold mb-2">Notice Board</h3>
-                <div className="bg-white/10 rounded-lg p-3 text-sm mb-2">
-                   <p className="font-bold text-yellow-400 mb-1">Staff Meeting</p>
-                   <p className="text-indigo-100">Tomorrow at 4:00 PM in the Conference Hall. Topic: Annual Day Prep.</p>
-                </div>
-             </div>
-          </div>
-       </div>
-    </DashboardLayout>
-  );
-};
-
-// --- 4. Student Dashboard ---
-
-export const StudentDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState('learning');
-  
-  const menuItems = [
-    { id: 'learning', label: 'My Learning', icon: <GraduationCap size={20} /> },
-    { id: 'assignments', label: 'Assignments', icon: <FileText size={20} /> },
-    { id: 'timetable', label: 'Timetable', icon: <Calendar size={20} /> },
-    { id: 'results', label: 'Exam Results', icon: <Activity size={20} /> },
-    { id: 'fees', label: 'Fee Status', icon: <CreditCard size={20} /> },
-  ];
-
-  return (
-    <DashboardLayout title="Student Portal" role="Rohan Das (Class 10-A)" menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab}>
-       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="col-span-2 bg-gradient-to-r from-brand-600 to-brand-500 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
-             <div className="relative z-10">
-                <h3 className="text-2xl font-bold mb-2">Upcoming Exam</h3>
-                <p className="text-brand-100 mb-6 text-lg">Physics Mid-Term Examination</p>
-                <div className="flex gap-4">
-                   <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg text-center min-w-[80px]">
-                      <span className="block text-2xl font-bold">02</span>
-                      <span className="text-xs uppercase">Days</span>
-                   </div>
-                   <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg text-center min-w-[80px]">
-                      <span className="block text-2xl font-bold">14</span>
-                      <span className="text-xs uppercase">Hours</span>
-                   </div>
-                </div>
-                <button className="mt-6 bg-white text-brand-600 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-brand-50 transition-colors">
-                   Start Revision
-                </button>
-             </div>
-             <BookOpen className="absolute right-0 bottom-0 text-brand-700 opacity-50 w-48 h-48 -mr-10 -mb-10" />
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
-             <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">Attendance</h3>
-                <p className="text-slate-500 text-sm">October 2024</p>
-             </div>
-             <div className="flex items-center justify-center py-6">
-                <div className="relative w-32 h-32 flex items-center justify-center">
-                   <svg className="w-full h-full" viewBox="0 0 36 36">
-                      <path className="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                      <path className="text-green-500" strokeDasharray="92, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                   </svg>
-                   <span className="absolute text-3xl font-bold text-slate-900">92%</span>
-                </div>
-             </div>
-             <div className="text-center text-sm font-medium text-slate-600 bg-slate-50 py-2 rounded-lg">
-                You are doing great!
-             </div>
-          </div>
-       </div>
-
-       <div className="grid md:grid-cols-2 gap-8">
-          <div>
-             <h3 className="font-bold text-slate-900 text-lg mb-4">Pending Assignments</h3>
-             <div className="space-y-4">
-                {[
-                   { subject: 'Physics', title: 'Thermodynamics Project', due: 'Tomorrow', color: 'orange' },
-                   { subject: 'English', title: 'Essay on Climate Change', due: 'Oct 28', color: 'blue' },
-                   { subject: 'Math', title: 'Quadratic Equations Worksheet', due: 'Oct 30', color: 'purple' },
-                ].map((task, i) => (
-                   <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center hover:shadow-md transition-shadow">
-                      <div>
-                         <span className={`text-xs font-bold bg-${task.color}-100 text-${task.color}-700 px-2 py-1 rounded`}>{task.subject}</span>
-                         <h4 className="font-bold text-slate-900 mt-2">{task.title}</h4>
-                         <p className="text-xs text-red-500 font-bold mt-1">Due: {task.due}</p>
-                      </div>
-                      <button className="p-2 bg-slate-100 rounded-lg hover:bg-slate-200 text-slate-600">
-                         <FileText size={20} />
-                      </button>
-                   </div>
-                ))}
-             </div>
-          </div>
-
-          <div>
-             <h3 className="font-bold text-slate-900 text-lg mb-4">Performance Trends</h3>
-             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-[300px] flex items-end justify-between px-4 pb-0">
-                {[65, 78, 82, 75, 90].map((score, i) => (
-                   <div key={i} className="flex flex-col items-center group">
-                      <div className="relative w-12 bg-blue-100 rounded-t-lg group-hover:bg-blue-500 transition-colors" style={{ height: `${score*2.5}px` }}>
-                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                            {score}%
-                         </div>
-                      </div>
-                      <span className="text-xs font-bold text-slate-500 mt-2 mb-4">Test {i+1}</span>
-                   </div>
-                ))}
-             </div>
-          </div>
-       </div>
-    </DashboardLayout>
-  );
-};
-
-// --- 5. Parent Dashboard ---
-
-export const ParentDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState('overview');
-  
-  const menuItems = [
-    { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
-    { id: 'fees', label: 'Fee Payments', icon: <CreditCard size={20} /> },
-    { id: 'report', label: 'Report Card', icon: <FileText size={20} /> },
-    { id: 'messages', label: 'Communication', icon: <Bell size={20} /> },
-  ];
-
-  return (
-    <DashboardLayout title="Parent Portal" role="Guardian of Rohan Das" menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab}>
-       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center">
-             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mr-4 font-bold text-2xl border-4 border-white shadow-sm">R</div>
-             <div>
-                <h3 className="font-bold text-xl text-slate-900">Rohan Das</h3>
-                <p className="text-sm text-slate-500">Class 10-A • Roll No. 24</p>
-                <p className="text-xs text-green-600 font-bold mt-1">Status: Present Today</p>
-             </div>
-          </div>
-          <div className="flex gap-3">
-             <button className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50">View Profile</button>
-             <button className="px-4 py-2 bg-slate-100 text-brand-600 rounded-xl text-sm font-bold hover:bg-slate-200">Switch Child</button>
-          </div>
-       </div>
-
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-red-50">
-                <div className="flex items-center text-red-700">
-                   <AlertCircle className="w-5 h-5 mr-2" />
-                   <h3 className="font-bold">Fee Due Alert</h3>
-                </div>
-                <span className="bg-white text-red-600 text-xs font-bold px-3 py-1 rounded-full border border-red-100">Overdue</span>
-             </div>
-             <div className="p-8 text-center">
-                <p className="text-sm text-slate-500 mb-1">Quarter 3 Tuition Fee</p>
-                <h2 className="text-4xl font-bold text-slate-900 mb-6">₹ 15,000</h2>
-                <button className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 shadow-lg flex items-center justify-center">
-                   Pay Now Securely <CreditCard className="ml-2 w-5 h-5" />
-                </button>
-                <p className="text-xs text-slate-400 mt-4">Powered by Secure Payment Gateway</p>
-             </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-             <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 className="font-bold text-slate-900">Recent Invoices</h3>
-                <button className="text-blue-600 text-xs font-bold">View History</button>
-             </div>
-             <div className="flex-1 overflow-auto">
-                <table className="w-full text-left">
-                   <tbody className="divide-y divide-slate-100">
-                      {[
-                         { id: "INV-003", desc: "Q2 Tuition Fee", date: "Jul 15", amount: "15,000", status: "Paid" },
-                         { id: "INV-002", desc: "Annual Charges", date: "Apr 10", amount: "8,500", status: "Paid" },
-                         { id: "INV-001", desc: "Transport Fee (Q1)", date: "Apr 05", amount: "4,500", status: "Paid" },
-                      ].map((inv, i) => (
-                         <tr key={i} className="hover:bg-slate-50">
-                            <td className="p-4">
-                               <p className="font-bold text-slate-900 text-sm">{inv.desc}</p>
-                               <p className="text-xs text-slate-500">{inv.date} • {inv.id}</p>
-                            </td>
-                            <td className="p-4 text-right">
-                               <p className="font-bold text-slate-900 text-sm">₹ {inv.amount}</p>
-                               <span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded">{inv.status}</span>
-                            </td>
-                            <td className="p-4 text-right">
-                               <button className="p-2 text-slate-400 hover:text-blue-600"><Download size={16} /></button>
-                            </td>
-                         </tr>
-                      ))}
-                   </tbody>
-                </table>
-             </div>
-          </div>
-       </div>
-
-       <div className="mt-8 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-          <h3 className="font-bold text-slate-900 mb-4">School Circulars</h3>
-          <div className="grid md:grid-cols-2 gap-4">
-             <div className="border border-slate-100 rounded-xl p-4 flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer">
-                <div className="bg-blue-100 text-blue-600 p-3 rounded-lg h-fit"><FileText size={20} /></div>
-                <div>
-                   <h4 className="font-bold text-slate-900 text-sm">Winter Uniform Schedule</h4>
-                   <p className="text-xs text-slate-500 mt-1 line-clamp-2">Dear Parents, starting from Nov 1st, all students are required to wear the winter uniform...</p>
-                   <span className="text-[10px] text-slate-400 mt-2 block">Yesterday, 10:00 AM</span>
-                </div>
-             </div>
-             <div className="border border-slate-100 rounded-xl p-4 flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer">
-                <div className="bg-orange-100 text-orange-600 p-3 rounded-lg h-fit"><Calendar size={20} /></div>
-                <div>
-                   <h4 className="font-bold text-slate-900 text-sm">Diwali Break Announced</h4>
-                   <p className="text-xs text-slate-500 mt-1 line-clamp-2">The school will remain closed from Oct 31st to Nov 4th on account of Diwali.</p>
-                   <span className="text-[10px] text-slate-400 mt-2 block">Oct 24, 2024</span>
-                </div>
-             </div>
-          </div>
-       </div>
-    </DashboardLayout>
-  );
-};
+export const SuperAdminDashboard = () => <div>Super Admin Console</div>;

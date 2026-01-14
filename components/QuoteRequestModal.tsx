@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, Loader2, Building2, FileText, ShoppingCart, User, Phone, Package } from './Icons';
 import { VendorProduct } from '../types';
+import { submitForm } from '../services/formService';
 
 interface QuoteRequestModalProps {
   product: VendorProduct | null;
@@ -15,14 +16,24 @@ const QuoteRequestModal: React.FC<QuoteRequestModalProps> = ({ product, isOpen, 
   const [isSuccess, setIsSuccess] = useState(false);
   const [quantity, setQuantity] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    const success = await submitForm('Vendor Quote Request', {
+        product: product.name,
+        qty: quantity,
+        ...data
+    });
+
+    setIsLoading(false);
+    if (success) {
       setIsSuccess(true);
-    }, 1500);
+    }
   };
 
   return (
@@ -45,9 +56,9 @@ const QuoteRequestModal: React.FC<QuoteRequestModalProps> = ({ product, isOpen, 
             <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 size={32} />
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">Quote Requested!</h3>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Quote Request Sent!</h3>
             <p className="text-slate-600 mb-8">
-              Your request for <span className="font-bold">{quantity} units</span> of <span className="font-bold">{product.name}</span> has been sent to <span className="font-semibold text-blue-700">{product.supplier}</span>. You will receive a formal quotation via email shortly.
+              We have forwarded your request to <span className="font-bold">{product.supplier}</span>. You will receive the quotation on your email within 24 hours.
             </p>
             <button 
               onClick={onClose}
@@ -97,6 +108,7 @@ const QuoteRequestModal: React.FC<QuoteRequestModalProps> = ({ product, isOpen, 
                  <div>
                    <label className="block text-sm font-medium text-slate-700 mb-1">School Name</label>
                    <input 
+                      name="school_name"
                       type="text" 
                       required
                       placeholder="e.g. Modern Academy"
@@ -110,6 +122,7 @@ const QuoteRequestModal: React.FC<QuoteRequestModalProps> = ({ product, isOpen, 
                  <div className="relative">
                    <User className="absolute left-3 top-3 text-slate-400 w-4 h-4" />
                    <input 
+                      name="contact_person"
                       type="text" 
                       required
                       placeholder="Full Name"
@@ -123,6 +136,7 @@ const QuoteRequestModal: React.FC<QuoteRequestModalProps> = ({ product, isOpen, 
                  <div className="relative">
                    <Phone className="absolute left-3 top-3 text-slate-400 w-4 h-4" />
                    <input 
+                      name="phone"
                       type="tel" 
                       required
                       placeholder="+91..."
@@ -134,6 +148,7 @@ const QuoteRequestModal: React.FC<QuoteRequestModalProps> = ({ product, isOpen, 
                <div>
                  <label className="block text-sm font-medium text-slate-700 mb-1">Additional Requirements</label>
                  <textarea 
+                    name="requirements"
                     rows={3}
                     placeholder="Specific brand, delivery timeline, or customization needed..."
                     className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none"
