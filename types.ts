@@ -405,4 +405,5 @@ export type Page =
   | 'refund-policy'
   | 'shipping-policy'
   | 'contact-us'
-  | 'it-services';
+  | 'it-services'
+  | 'custom-requirements';

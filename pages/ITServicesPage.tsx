@@ -107,7 +107,7 @@ const ITServicesPage: React.FC = () => {
             From stunning custom websites to robust enterprise ERP systems, we deliver fully customized, scalable, and secure IT solutions tailored to your specific business needs.
           </p>
           <button 
-            onClick={() => handlePurchase('Custom Consultation')}
+            onClick={() => navigate('custom-requirements')}
             className="bg-white text-slate-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-50 transition-all shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] flex items-center mx-auto"
           >
             Start Your Project <ArrowRight className="ml-2 w-5 h-5" />
