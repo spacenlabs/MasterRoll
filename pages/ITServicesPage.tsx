@@ -2,6 +2,16 @@ import React from 'react';
 import { Code, Database, Smartphone, Zap, Shield, Globe, CheckCircle2, CreditCard, ArrowRight } from 'lucide-react';
 import { useNavigation } from '../contexts/NavigationContext';
 
+const loadRazorpay = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 const ITServicesPage: React.FC = () => {
   const { navigate } = useNavigation();
 
@@ -38,10 +48,43 @@ const ITServicesPage: React.FC = () => {
     }
   ];
 
-  const handlePurchase = (plan: string) => {
-    // In a real application, this would redirect to a specific Razorpay payment link
-    // or trigger the Razorpay checkout script with the appropriate amount.
-    window.open('https://pages.razorpay.com/', '_blank');
+  const handlePurchase = async (plan: string) => {
+    const isLoaded = await loadRazorpay();
+    
+    if (!isLoaded) {
+      alert("Razorpay SDK failed to load. Are you online?");
+      return;
+    }
+
+    const options = {
+      // NOTE: Enter your actual Key ID here from Razorpay Dashboard
+      key: "rzp_live_TMZhjI3uGpOk6f", 
+      amount: "9999900", // Amount is in currency subunits (99,999 * 100 paise)
+      currency: "INR",
+      name: "MasterRoll IT Solutions",
+      description: plan,
+      image: "https://example.com/your_logo", // Optional logo
+      handler: function (response: any) {
+        alert("Payment Successful!\nPayment ID: " + response.razorpay_payment_id);
+      },
+      prefill: {
+        name: "Valued Client",
+        email: "client@example.com",
+        contact: "9999999999"
+      },
+      notes: {
+        address: "MasterRoll Corporate Office"
+      },
+      theme: {
+        color: "#14b8a6" // Your brand color
+      }
+    };
+
+    const paymentObject = new (window as any).Razorpay(options);
+    paymentObject.on('payment.failed', function (response: any) {
+      alert("Payment Failed: " + response.error.description);
+    });
+    paymentObject.open();
   };
 
   return (
@@ -125,7 +168,7 @@ const ITServicesPage: React.FC = () => {
                   onClick={() => handlePurchase('10-Year Master Subscription (₹99,999)')}
                   className="w-full sm:w-auto bg-brand-500 hover:bg-brand-400 text-slate-950 font-black px-8 py-4 rounded-xl transition-all shadow-[0_0_30px_-5px_rgba(20,184,166,0.4)] flex items-center justify-center uppercase tracking-wider"
                 >
-                  <CreditCard className="w-5 h-5 mr-3" /> Secure 10 Years Now
+                  <CreditCard className="w-5 h-5 mr-3" /> Buy Now
                 </button>
               </div>
 
