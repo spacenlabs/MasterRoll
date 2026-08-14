@@ -101,12 +101,35 @@ const LMSDashboardPage: React.FC = () => {
         {/* Mobile Header */}
         <div className="lg:hidden mb-6 flex justify-between items-center">
            <div className="flex items-center gap-2">
-             <button onClick={goBack}><ArrowLeft className="text-slate-900" /></button>
-             <h1 className="text-2xl font-bold text-slate-900">Creator Studio</h1>
+             <button onClick={goBack} className="p-2 hover:bg-slate-100 rounded-lg transition-colors"><ArrowLeft className="text-slate-900 w-6 h-6" /></button>
+             <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Creator Studio</h1>
            </div>
-           <button onClick={() => setIsUploadModalOpen(true)} className="bg-brand-600 text-white p-2 rounded-lg">
-             <Plus size={24} />
+           <button onClick={() => setIsUploadModalOpen(true)} className="bg-brand-600 text-white p-2 rounded-xl hover:bg-brand-700 shadow-md">
+             <Plus size={20} />
            </button>
+        </div>
+
+        {/* Mobile Tab Switcheable Quick Bar (Horizontal Scrollable Chips List) */}
+        <div className="lg:hidden mb-6 flex gap-2 overflow-x-auto pb-3 custom-scrollbar">
+          {[
+            { id: 'dashboard', label: 'Overview', icon: <LayoutDashboard size={14} /> },
+            { id: 'courses', label: 'My Courses', icon: <Video size={14} /> },
+            { id: 'students', label: 'Students', icon: <Users size={14} /> },
+            { id: 'earnings', label: 'Earnings', icon: <DollarSign size={14} /> },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-4.5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider whitespace-nowrap border transition-all ${
+                activeTab === tab.id
+                  ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/25'
+                  : 'bg-white text-slate-600 border-slate-205 hover:bg-slate-50'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Stats Strip */}
@@ -140,72 +163,207 @@ const LMSDashboardPage: React.FC = () => {
            </div>
         </div>
 
-        {/* Course List */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-          <h2 className="text-2xl font-bold text-slate-900">My Digital Courses</h2>
-          <button 
-            onClick={() => setIsUploadModalOpen(true)}
-            className="hidden sm:flex bg-brand-600 hover:bg-brand-700 text-white px-6 py-3 rounded-xl font-bold items-center shadow-lg shadow-brand-500/30 transition-all"
-          >
-            <Plus className="w-5 h-5 mr-2" /> Create New Course
-          </button>
-        </div>
+        {/* Conditional Tab Rendering */}
+        {(() => {
+          switch (activeTab) {
+            case 'dashboard':
+              return (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <h2 className="text-2xl font-bold text-slate-900">Creator Analytics</h2>
+                  
+                  {/* Visual Charts / Grid */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                      <h3 className="font-bold text-slate-800 mb-4 text-base">Daily Watch Time (Hours)</h3>
+                      <div className="flex items-end gap-3 h-32 pt-4">
+                        {[45, 60, 30, 80, 95, 70, 110].map((h, i) => (
+                          <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                            <div className="w-full bg-brand-500 rounded-t-lg transition-all duration-500" style={{ height: `${(h / 120) * 100}%` }}></div>
+                            <span className="text-[9px] text-slate-400 font-bold font-mono">Day {i+1}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
-        {isLoading ? (
-           <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="animate-spin h-10 w-10 text-brand-600 mb-4" />
-              <p className="text-slate-500 font-medium">Syncing courses with Supabase...</p>
-           </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course) => (
-              <div key={course.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow group">
-                  <div className="relative h-48 bg-slate-100">
-                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
-                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-                        {course.status}
-                    </div>
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button className="bg-white text-slate-900 px-6 py-2 rounded-full font-bold transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                          Manage Content
-                        </button>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-bold text-slate-900 line-clamp-1 text-lg">{course.title}</h3>
-                        <button className="text-slate-400 hover:text-slate-600"><MoreVertical size={20} /></button>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
-                        <span className="flex items-center"><Users size={14} className="mr-1" /> {course.sales} Sales</span>
-                        <span className="flex items-center"><Star size={14} className="mr-1 text-yellow-500" /> {course.rating}</span>
-                    </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                      <h3 className="font-bold text-slate-800 mb-4 text-base">Course Completion Rate</h3>
+                      <div className="space-y-4">
                         <div>
-                          <p className="text-xs text-slate-500">Price</p>
-                          <p className="font-bold text-slate-900">{course.price}</p>
+                          <div className="flex justify-between text-xs text-slate-600 mb-1">
+                            <span className="font-medium">Python Bootcamp</span>
+                            <span className="font-bold text-slate-900">78%</span>
+                          </div>
+                          <div className="w-full bg-slate-100 h-2 rounded-full">
+                            <div className="bg-brand-500 h-2 rounded-full" style={{ width: '78%' }}></div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-slate-500">Total Revenue</p>
-                          <p className="font-bold text-green-600">{course.revenue}</p>
+                        <div>
+                          <div className="flex justify-between text-xs text-slate-600 mb-1">
+                            <span className="font-medium">Mental Math Tricks</span>
+                            <span className="font-bold text-slate-900">92%</span>
+                          </div>
+                          <div className="w-full bg-slate-100 h-2 rounded-full">
+                            <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '92%' }}></div>
+                          </div>
                         </div>
+                        <div>
+                          <div className="flex justify-between text-xs text-slate-600 mb-1">
+                            <span className="font-medium">NCERT Class 10 Physics</span>
+                            <span className="font-bold text-slate-900">64%</span>
+                          </div>
+                          <div className="w-full bg-slate-100 h-2 rounded-full">
+                            <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '64%' }}></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-              </div>
-            ))}
-            
-            <button 
-              onClick={() => setIsUploadModalOpen(true)}
-              className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center h-full min-h-[300px] hover:bg-slate-100 hover:border-brand-400 transition-all group"
-            >
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                  <Plus className="w-8 h-8 text-slate-400 group-hover:text-brand-600" />
                 </div>
-                <h3 className="font-bold text-slate-600 group-hover:text-brand-700">Add New Course</h3>
-                <p className="text-sm text-slate-400 mt-1">Video, PDF, or Live</p>
-            </button>
-          </div>
-        )}
+              );
+
+            case 'students':
+              return (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <h2 className="text-2xl font-bold text-slate-900">Enrolled Students</h2>
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left">
+                        <thead className="bg-slate-50 text-slate-500 text-xs uppercase border-b">
+                          <tr>
+                            <th className="px-6 py-4 font-semibold">Student Name</th>
+                            <th className="px-6 py-4 font-semibold">Course</th>
+                            <th className="px-6 py-4 font-semibold">Enrollment Date</th>
+                            <th className="px-6 py-4 font-semibold">Access Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-sm">
+                          {[
+                            { name: "Rahul Kumar", course: "Complete Python Bootcamp", date: "June 2, 2026", status: "Active" },
+                            { name: "Ananya Sharma", course: "NCERT Class 10 Physics", date: "June 1, 2026", status: "Active" },
+                            { name: "Vikram Singh", course: "Mental Math Tricks", date: "May 28, 2026", status: "Active" },
+                            { name: "Priya Patel", course: "Complete Python Bootcamp/LMS", date: "May 25, 2026", status: "Expired" },
+                          ].map((stu, i) => (
+                            <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="px-6 py-4 font-bold text-slate-900">{stu.name}</td>
+                              <td className="px-6 py-4 text-slate-600 font-medium">{stu.course}</td>
+                              <td className="px-6 py-4 text-slate-400 font-bold font-mono text-xs">{stu.date}</td>
+                              <td className="px-6 py-4">
+                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                  stu.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                                }`}>{stu.status}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              );
+
+            case 'earnings':
+              return (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <h2 className="text-2xl font-bold text-slate-900">Earnings Summary</h2>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                      <h3 className="font-bold text-slate-800 mb-2 text-base">Next Payout Method</h3>
+                      <p className="text-slate-500 text-sm mb-4 leading-relaxed">Earnings are automatically settled directly and securely to your verified bank account on the 1st of every month.</p>
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest">Linked Settlement Account</p>
+                        <p className="font-bold text-slate-900 mt-1">State Bank of India (Ending in 4021)</p>
+                        <p className="text-xs text-emerald-600 font-bold mt-1.5 flex items-center">✓ Verified for Auto-Settlements</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-slate-800 mb-1 text-base">Settled Creator Balance</h3>
+                        <p className="text-slate-400 text-xs">Available for instant manual transfer</p>
+                        <p className="text-4xl font-black text-slate-900 mt-4">₹ 45,710</p>
+                      </div>
+                      <button className="w-full bg-brand-600 text-white font-bold py-4 mt-6 rounded-xl hover:bg-brand-700 shadow-lg shadow-brand-500/20 active:scale-95 transition-all text-sm uppercase tracking-widest">
+                        Withdraw Cleared Balance
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+
+            case 'courses':
+            default:
+              return (
+                <>
+                  {/* Course List */}
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                    <h2 className="text-2xl font-bold text-slate-900">My Digital Courses</h2>
+                    <button 
+                      onClick={() => setIsUploadModalOpen(true)}
+                      className="hidden sm:flex bg-brand-600 hover:bg-brand-700 text-white px-6 py-3 rounded-xl font-bold items-center shadow-lg shadow-brand-500/30 transition-all"
+                    >
+                      <Plus className="w-5 h-5 mr-2" /> Create New Course
+                    </button>
+                  </div>
+
+                  {isLoading ? (
+                     <div className="flex flex-col items-center justify-center py-20">
+                        <Loader2 className="animate-spin h-10 w-10 text-brand-600 mb-4" />
+                        <p className="text-slate-500 font-medium">Syncing courses with Supabase...</p>
+                     </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {courses.map((course) => (
+                        <div key={course.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow group animate-in zoom-in-95 duration-200">
+                            <div className="relative h-48 bg-slate-100">
+                              <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                              <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                                  {course.status}
+                              </div>
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <button className="bg-white text-slate-900 px-6 py-2 rounded-full font-bold transform translate-y-2 group-hover:translate-y-0 transition-transform text-sm">
+                                    Manage Content
+                                  </button>
+                              </div>
+                            </div>
+                            <div className="p-5">
+                              <div className="flex justify-between items-start mb-2">
+                                  <h3 className="font-bold text-slate-900 line-clamp-1 text-lg">{course.title}</h3>
+                                  <button className="text-slate-400 hover:text-slate-600"><MoreVertical size={20} /></button>
+                              </div>
+                              <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
+                                  <span className="flex items-center"><Users size={14} className="mr-1" /> {course.sales} Sales</span>
+                                  <span className="flex items-center"><Star size={14} className="mr-1 text-yellow-500" /> {course.rating}</span>
+                              </div>
+                              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                  <div>
+                                    <p className="text-xs text-slate-500">Price</p>
+                                    <p className="font-bold text-slate-900">{course.price}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-xs text-slate-500">Total Revenue</p>
+                                    <p className="font-bold text-green-600">{course.revenue}</p>
+                                  </div>
+                              </div>
+                            </div>
+                        </div>
+                      ))}
+                      
+                      <button 
+                        onClick={() => setIsUploadModalOpen(true)}
+                        className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center h-full min-h-[300px] hover:bg-slate-100 hover:border-brand-400 transition-all group animate-in fade-in duration-200"
+                      >
+                          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                            <Plus className="w-8 h-8 text-slate-400 group-hover:text-brand-600" />
+                          </div>
+                          <h3 className="font-bold text-slate-600 group-hover:text-brand-700">Add New Course</h3>
+                          <p className="text-sm text-slate-400 mt-1">Video, PDF, or Live</p>
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+          }
+        })()}
       </main>
 
       <UploadCourseModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} onRefresh={loadCourses} />

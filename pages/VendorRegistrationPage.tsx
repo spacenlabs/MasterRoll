@@ -148,7 +148,7 @@ const VendorRegistrationPage: React.FC = () => {
               <p className="text-slate-500 text-sm mb-4">Contact our vendor onboarding team.</p>
               <div className="flex items-center text-slate-700 font-medium">
                 <Phone className="w-4 h-4 mr-2" />
-                +91 7979078400
+                +91 9973216308
               </div>
             </div>
           </div>

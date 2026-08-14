@@ -37,6 +37,13 @@ import {
   SuperAdminDashboard, OrgDashboard, TeacherDashboard, 
   StudentDashboard, ParentDashboard 
 } from './pages/UserDashboards';
+import {
+  TermsAndConditionsPage,
+  PrivacyPolicyPage,
+  RefundPolicyPage,
+  ShippingPolicyPage,
+  ContactUsPage
+} from './pages/PolicyPages';
 
 const AppContent: React.FC = () => {
   const { currentPage, navigate } = useNavigation();
@@ -134,6 +141,11 @@ const AppContent: React.FC = () => {
       case 'school-subscription': return <SchoolSubscriptionPage />;
       case 'create-branch': return <CreateBranchPage />;
       case 'online-admission-public': return <OnlineAdmissionPublic />;
+      case 'terms-and-conditions': return <TermsAndConditionsPage />;
+      case 'privacy-policy': return <PrivacyPolicyPage />;
+      case 'refund-policy': return <RefundPolicyPage />;
+      case 'shipping-policy': return <ShippingPolicyPage />;
+      case 'contact-us': return <ContactUsPage />;
       default: return <Home />;
     }
   };

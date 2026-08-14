@@ -343,12 +343,45 @@ const VendorDashboardPage: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 lg:ml-64 p-4 lg:p-8 pt-24 lg:pt-8">
-        {/* Mobile Header Toggle (Simplified) */}
-        <div className="lg:hidden mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-           <h1 className="text-xl font-bold text-slate-900">Vendor Portal</h1>
-           <div className="flex gap-2">
-             <button onClick={() => setActiveTab('overview')} className={`p-2 rounded-lg border transition-colors ${activeTab === 'overview' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-500'}`}><LayoutDashboard size={20} /></button>
-             <button onClick={() => setActiveTab('support')} className={`p-2 rounded-lg border transition-colors ${activeTab === 'support' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-500'}`}><MessageSquare size={20} /></button>
+        {/* Mobile Header Toggle (All 4 Tabs Supported) */}
+        <div className="lg:hidden mb-6 flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4.5 rounded-[2rem] shadow-sm border border-slate-200">
+           <div className="flex justify-between items-center w-full md:w-auto">
+             <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">Vendor Portal</h1>
+             <span className="text-[9px] font-black uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded md:hidden">VND-889</span>
+           </div>
+           <div className="flex gap-2 justify-around w-full md:w-auto border-t border-slate-100 pt-3.5 md:pt-0 md:border-t-0">
+             <button 
+               onClick={() => setActiveTab('overview')} 
+               className={`flex-1 md:flex-initial p-3.5 rounded-xl border transition-all flex justify-center items-center gap-1.5 ${activeTab === 'overview' ? 'bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+               title="Dashboard Metrics"
+             >
+               <LayoutDashboard size={18} />
+               <span className="text-[10px] font-black uppercase tracking-wider md:hidden">Stats</span>
+             </button>
+             <button 
+               onClick={() => setActiveTab('listings')} 
+               className={`flex-1 md:flex-initial p-3.5 rounded-xl border transition-all flex justify-center items-center gap-1.5 ${activeTab === 'listings' ? 'bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+               title="My Products"
+             >
+               <Package size={18} />
+               <span className="text-[10px] font-black uppercase tracking-wider md:hidden">Items</span>
+             </button>
+             <button 
+               onClick={() => setActiveTab('orders')} 
+               className={`flex-1 md:flex-initial p-3.5 rounded-xl border transition-all flex justify-center items-center gap-1.5 ${activeTab === 'orders' ? 'bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+               title="Active Orders"
+             >
+               <ShoppingBag size={18} />
+               <span className="text-[10px] font-black uppercase tracking-wider md:hidden">Orders</span>
+             </button>
+             <button 
+               onClick={() => setActiveTab('support')} 
+               className={`flex-1 md:flex-initial p-3.5 rounded-xl border transition-all flex justify-center items-center gap-1.5 ${activeTab === 'support' ? 'bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+               title="AI Helpdesk"
+             >
+               <MessageSquare size={18} />
+               <span className="text-[10px] font-black uppercase tracking-wider md:hidden">Support</span>
+             </button>
            </div>
         </div>
 

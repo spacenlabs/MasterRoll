@@ -5,7 +5,7 @@ import {
   TrendingUp, Activity, Bell, Calendar, BookOpen, 
   UserCheck, Shield, FileText, Settings, Plus, Search, 
   Filter, MoreVertical, Download, Mail, Phone, DollarSign, 
-  Loader2, CheckCircle2, AlertCircle, X, MapPin, UserPlus,
+  Loader2, CheckCircle2, AlertCircle, X, MapPin, UserPlus, Menu,
   ArrowRight, Landmark, Zap, ClipboardList, Trash2,
   GraduationCap, MessageSquare, Briefcase, Building2,
   Baby, Pencil, Eye, Printer, FileSpreadsheet, Globe, Smartphone,
@@ -916,8 +916,124 @@ export const DashboardLayout: React.FC<{
   setActiveTab: (id: string) => void;
   children: React.ReactNode;
 }> = ({ title, role, menuItems, activeTab, setActiveTab, children }) => {
+  const { navigate } = useNavigation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openMobileMenus, setOpenMobileMenus] = useState<string[]>([]);
+
   return (
-    <div className="pt-20 bg-slate-50 min-h-screen flex font-sans">
+    <div className="pt-16 lg:pt-20 bg-slate-50 min-h-screen flex font-sans">
+      {/* Mobile Top Header Bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-40 text-white shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-brand-600 rounded-xl flex items-center justify-center shadow-lg"><School size={16}/></div>
+          <div>
+            <h2 className="text-xs font-black uppercase tracking-tight truncate max-w-[150px]">{title}</h2>
+            <p className="text-[7px] text-slate-500 uppercase tracking-widest font-black">{role}</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="p-2 hover:bg-slate-800 rounded-xl transition-all"
+          aria-label="Open Navigation Drawer"
+        >
+          <Menu size={20} />
+        </button>
+      </div>
+
+      {/* Mobile Navigation Drawer Modal Overlay */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop screen mask */}
+          <div 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          
+          {/* Main Slide-out Drawer */}
+          <div className="relative flex flex-col w-72 max-w-xs bg-slate-900 text-white h-full shadow-2xl animate-in slide-in-from-left duration-300">
+            <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center"><School size={18}/></div>
+                <div>
+                  <h2 className="text-xs font-black uppercase tracking-tight truncate max-w-[120px]">{title}</h2>
+                  <p className="text-[7px] text-slate-500 uppercase tracking-widest font-black">{role}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto pb-24">
+              {menuItems.map((item) => {
+                const isItemActive = activeTab === item.id || (item.subItems && item.subItems.some((s: any) => s.id === activeTab));
+                return (
+                  <div key={item.id}>
+                    <button 
+                      onClick={() => {
+                        if (item.subItems) {
+                          setOpenMobileMenus(prev => prev.includes(item.id) ? prev.filter(i => i !== item.id) : [...prev, item.id]);
+                        } else {
+                          setActiveTab(item.id);
+                          setIsMobileMenuOpen(false);
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
+                        isItemActive
+                        ? 'bg-brand-600 text-white shadow-xl shadow-brand-500/10' 
+                        : 'text-slate-500 hover:bg-slate-850 hover:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <span className={`mr-3 ${isItemActive ? 'text-white' : 'text-slate-600'}`}>{item.icon}</span>
+                        <span className="text-xs font-black uppercase tracking-widest">{item.label}</span>
+                      </div>
+                      {item.subItems && (
+                        <Plus size={10} className={`transition-transform duration-300 ${openMobileMenus.includes(item.id) ? 'rotate-45' : ''}`} />
+                      )}
+                    </button>
+                    {item.subItems && openMobileMenus.includes(item.id) && (
+                      <div className="ml-9 mt-1 space-y-1 border-l border-slate-805 pl-4">
+                        {item.subItems.map((sub: any) => (
+                          <button 
+                            key={sub.id}
+                            onClick={() => {
+                              setActiveTab(sub.id);
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                              activeTab === sub.id ? 'text-brand-405' : 'text-slate-500 hover:text-slate-300'
+                            }`}
+                          >
+                            {sub.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
+
+            <div className="p-4 border-t border-slate-800 bg-slate-900 absolute bottom-0 w-full">
+              <button 
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  navigate('home');
+                }} 
+                className="w-full flex items-center px-4 py-3 text-rose-500 hover:bg-rose-500/10 rounded-2xl transition-all"
+              >
+                <LogOut size={18} className="mr-3" />
+                <span className="text-xs font-black uppercase tracking-widest">Terminate Session</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <DashboardSidebar 
         title={title} 
         role={role} 

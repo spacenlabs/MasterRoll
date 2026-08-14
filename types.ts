@@ -399,4 +399,9 @@ export type Page =
   | 'admission-enquiry'
   | 'school-subscription'
   | 'create-branch'
-  | 'online-admission-public';
+  | 'online-admission-public'
+  | 'terms-and-conditions'
+  | 'privacy-policy'
+  | 'refund-policy'
+  | 'shipping-policy'
+  | 'contact-us';

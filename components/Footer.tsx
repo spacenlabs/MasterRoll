@@ -51,18 +51,21 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-sm">
-              <li>Bengaluru, India</li>
+              <li>Bengaluru, Karnataka</li>
               <li>support@masterroll.in</li>
-              <li>+91 7979078400</li>
+              <li>+91 9973216308</li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center text-sm">
-          <p>&copy; {new Date().getFullYear()} MasterRoll Technologies Pvt Ltd. All rights reserved.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <button className="hover:text-white">Privacy Policy</button>
-            <button className="hover:text-white">Terms of Service</button>
+          <p>&copy; {new Date().getFullYear()} MasterRoll Technologies. All rights reserved.</p>
+          <div className="flex flex-wrap gap-4 mt-4 md:mt-0 justify-center">
+            <button onClick={() => navigate('terms-and-conditions')} className="hover:text-white">Terms of Service</button>
+            <button onClick={() => navigate('privacy-policy')} className="hover:text-white">Privacy Policy</button>
+            <button onClick={() => navigate('refund-policy')} className="hover:text-white">Refund Policy</button>
+            <button onClick={() => navigate('shipping-policy')} className="hover:text-white">Shipping Policy</button>
+            <button onClick={() => navigate('contact-us')} className="hover:text-white">Contact Us</button>
           </div>
         </div>
       </div>

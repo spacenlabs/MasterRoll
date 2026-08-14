@@ -66,7 +66,7 @@ const DemoPage: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-center text-slate-600">
                   <Phone className="w-5 h-5 mr-3 text-slate-400" />
-                  +91 7979078400 (Sales)
+                  +91 9973216308 (Sales)
                 </div>
                 <div className="flex items-center text-slate-600">
                   <MessageCircle className="w-5 h-5 mr-3 text-slate-400" />
