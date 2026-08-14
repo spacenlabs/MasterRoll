@@ -404,4 +404,5 @@ export type Page =
   | 'privacy-policy'
   | 'refund-policy'
   | 'shipping-policy'
-  | 'contact-us';
+  | 'contact-us'
+  | 'it-services';

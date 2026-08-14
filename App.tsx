@@ -44,6 +44,7 @@ import {
   ShippingPolicyPage,
   ContactUsPage
 } from './pages/PolicyPages';
+import ITServicesPage from './pages/ITServicesPage';
 
 const AppContent: React.FC = () => {
   const { currentPage, navigate } = useNavigation();
@@ -146,6 +147,7 @@ const AppContent: React.FC = () => {
       case 'refund-policy': return <RefundPolicyPage />;
       case 'shipping-policy': return <ShippingPolicyPage />;
       case 'contact-us': return <ContactUsPage />;
+      case 'it-services': return <ITServicesPage />;
       default: return <Home />;
     }
   };

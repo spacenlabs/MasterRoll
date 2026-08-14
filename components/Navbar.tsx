@@ -42,6 +42,8 @@ const Navbar: React.FC = () => {
       }
     } else if (target === 'pricing') {
       navigate('pricing');
+    } else if (target === 'it-services') {
+      navigate('it-services');
     } else if (target === 'demo') {
       navigate('demo');
     } else if (target === 'home') {
@@ -103,6 +105,12 @@ const Navbar: React.FC = () => {
               Ecosystem
             </button>
             <button
+              onClick={() => handleNavClick('it-services')}
+              className={`font-medium hover:text-brand-500 transition-colors ${scrolled || currentPage !== 'home' ? 'text-slate-600' : 'text-slate-100'}`}
+            >
+              IT Services
+            </button>
+            <button
               onClick={() => handleNavClick('pricing')}
               className={`font-medium hover:text-brand-500 transition-colors ${scrolled || currentPage !== 'home' ? 'text-slate-600' : 'text-slate-100'}`}
             >
@@ -142,6 +150,7 @@ const Navbar: React.FC = () => {
             <button onClick={() => handleNavClick('home')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Home</button>
             <button onClick={() => handleNavClick('home-section')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Products</button>
             <button onClick={() => handleNavClick('ecosystem')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Ecosystem</button>
+            <button onClick={() => handleNavClick('it-services')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">IT Services</button>
             <button onClick={() => handleNavClick('pricing')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md">Pricing</button>
              <button onClick={() => handleNavClick('login')} className="text-left px-3 py-3 text-base font-medium text-slate-700 hover:bg-gray-50 rounded-md flex items-center">
               <LogIn className="w-4 h-4 mr-2" /> Login
